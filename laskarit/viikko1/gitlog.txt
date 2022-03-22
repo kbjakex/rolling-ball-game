@@ -1,0 +1,97 @@
+commit bbe8610313e7b62e65e21cffa6acd5a3ea005eeb
+Author: kbjakex <90567676+kbjakex@users.noreply.github.com>
+Date:   Tue Mar 22 22:04:20 2022 +0200
+
+    poista file1 ja nimeä file2 -> file22
+
+ tiedostoja/file2             | 0
+ tiedostoja/{file1 => file22} | 0
+ 2 files changed, 0 insertions(+), 0 deletions(-)
+
+commit 28de76d7af074a44fd2c83e03c2e8d98374e3d22
+Author: kbjakex <90567676+kbjakex@users.noreply.github.com>
+Date:   Tue Mar 22 22:01:54 2022 +0200
+
+    lisättiin hakemisto 'tiedostoja'
+
+ tiedostoja/file1 | 0
+ tiedostoja/file2 | 0
+ tiedostoja/file3 | 0
+ 3 files changed, 0 insertions(+), 0 deletions(-)
+
+commit 71229978b38074ffa2b6547c581c7f18f0218517
+Author: kbjakex <90567676+kbjakex@users.noreply.github.com>
+Date:   Tue Mar 22 21:56:14 2022 +0200
+
+    muutoksia tiedostoihin eka.txt ja kolmas.txt
+
+ eka.txt    | 2 +-
+ kolmas.txt | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 840bddd24c28aaf63dee4cde33b14e05d4939e09
+Author: kbjakex <90567676+kbjakex@users.noreply.github.com>
+Date:   Tue Mar 22 21:54:35 2022 +0200
+
+    muutettiin nimi tiedosto.txt -> eka.txt
+
+ eka.txt      | 1 +
+ tiedosto.txt | 1 -
+ 2 files changed, 1 insertion(+), 1 deletion(-)
+
+commit 0eadbfad67d82d8c31eebb3c34592391be975160
+Author: kbjakex <90567676+kbjakex@users.noreply.github.com>
+Date:   Tue Mar 22 21:41:18 2022 +0200
+
+    poistettiin tiedosto.txt
+
+ toinen.txt | 1 -
+ 1 file changed, 1 deletion(-)
+
+commit dc7ad4bbe76fedaad185e6ff08534c45ebc5f6ae
+Author: kbjakex <90567676+kbjakex@users.noreply.github.com>
+Date:   Tue Mar 22 21:38:52 2022 +0200
+
+    lisättiin tekstiä
+
+ tiedosto.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit ccfa25ec19bb050fdba9ec4660fcf7dc566feff7
+Author: kbjakex <90567676+kbjakex@users.noreply.github.com>
+Date:   Tue Mar 22 21:36:21 2022 +0200
+
+    lisäys ja muutoksia
+
+ kolmas.txt         | 1 +
+ stuff/tiedosto.txt | 0
+ toinen.txt         | 1 +
+ 3 files changed, 2 insertions(+)
+
+commit a9df4c8c4ae72abdb72d562f61a288056af21811
+Author: kbjakex <90567676+kbjakex@users.noreply.github.com>
+Date:   Tue Mar 22 21:34:42 2022 +0200
+
+    kolmas.txt luotu
+
+ kolmas.txt | 0
+ 1 file changed, 0 insertions(+), 0 deletions(-)
+
+commit b1eb7ad2b7361ea7650f613819de37cc28a925ad
+Author: kbjakex <90567676+kbjakex@users.noreply.github.com>
+Date:   Tue Mar 22 21:33:07 2022 +0200
+
+    muutos ja lisäys
+
+ tiedosto.txt | 1 +
+ toinen.txt   | 0
+ 2 files changed, 1 insertion(+)
+
+commit cf21c27c57b9126d726a2f4974c92ca6f8f785f7
+Author: kbjakex <90567676+kbjakex@users.noreply.github.com>
+Date:   Tue Mar 22 21:31:36 2022 +0200
+
+    tiedosto.txt luotu
+
+ tiedosto.txt | 0
+ 1 file changed, 0 insertions(+), 0 deletions(-)
