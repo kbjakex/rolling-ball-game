@@ -1,5 +1,9 @@
-## A very cool repository
+# Ohjelmistotekniikka, harjoitustyö
 
-.. with a README that contains text formatted with **bold** and *italics*!
+## Tehtävät
 
-This is for a University course.
+### Viikko 1
+
+[gitlog.txt](https://github.com/kbjakex/ot-harjoitystyo/blob/main/laskarit/viikko1/gitlog.txt)
+
+[komentorivi.txt](https://github.com/kbjakex/ot-harjoitystyo/blob/main/laskarit/viikko1/komentorivi.txt)
