@@ -8,4 +8,7 @@
 
 [komentorivi.txt](https://github.com/kbjakex/ot-harjoitystyo/blob/main/laskarit/viikko1/komentorivi.txt)
 
-Muutos!
+### Viikko 2
+
+[Vaatimusmäärittely](https://github.com/kbjakex/ot-harjoitystyo/blob/main/dokumentaatio/vaatimusmaarittely.md)
+[Työaikakirjanpito](https://github.com/kbjakex/ot-harjoitystyo/blob/main/dokumentaatio/tyoaikakirjanpito.md)
