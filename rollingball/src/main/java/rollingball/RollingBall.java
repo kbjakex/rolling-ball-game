@@ -42,7 +42,6 @@ public class RollingBall extends Application {
             quitButton
         );
         mainMenu.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
-        mainMenu.setPadding(new Insets(10.0));
         mainMenu.setAlignment(Pos.TOP_CENTER);
         
         return new Scene(mainMenu, 800, 800);
