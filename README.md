@@ -8,7 +8,7 @@ Meneillään on viikko 3, eli sovellus on vielä hyvin vaiheessa.
 
 [Vaatimusmäärittely](https://github.com/kbjakex/ot-harjoitystyo/blob/main/dokumentaatio/vaatimusmaarittely.md)
 
-[Työaikakirjanpito](https://github.com/kbjakex/ot-harjoitystyo/blob/main/dokumentaatio/tuntikirjanpito.md)
+[Työaikakirjanpito](https://github.com/kbjakex/ot-harjoitystyo/blob/main/dokumentaatio/tyoaikakirjanpito.md)
 
 ### Testaus
 
