@@ -1,4 +1,6 @@
-package rollingball;
+package rollingball.ui;
+
+import java.util.Stack;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -23,19 +25,30 @@ public class RollingBall extends Application {
     }
 
     private Scene createMainMenuScene(Stage primaryStage) {
+        var mainMenu = new VBox();
+        var scene = new Scene(mainMenu, 800, 800);
+        
+        var sceneStack = new Stack<Scene>();
+        
         var titleLabel = createLabel("Rolling Ball Game", 50, 150);
         titleLabel.setUnderline(true);
-
+        
         var startButton = createButton("Start", 30, 20);
-        startButton.setOnAction(e -> primaryStage.setScene(createGameScene(primaryStage)));
+        startButton.setOnAction(e -> {
+            sceneStack.push(scene);
+            primaryStage.setScene(createGameScene(primaryStage, sceneStack));
+        });
 
         var levelsButton = createButton("Level Select", 30, 20);
-        levelsButton.setOnAction(e -> primaryStage.setScene(createLevelSelectScene(primaryStage)));
+        levelsButton.setOnAction(e -> {
+            sceneStack.push(scene);
+            primaryStage.setScene(createLevelSelectScene(primaryStage, sceneStack));
+        });
 
         var quitButton = createButton("Quit", 30, 20);
         quitButton.setOnAction(e -> primaryStage.close());
 
-        var mainMenu = new VBox(
+        mainMenu.getChildren().addAll(
             titleLabel,
             startButton,
             levelsButton,
@@ -44,19 +57,21 @@ public class RollingBall extends Application {
         mainMenu.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
         mainMenu.setAlignment(Pos.TOP_CENTER);
         
-        return new Scene(mainMenu, 800, 800);
+        return scene;
     }
 
-    private Scene createGameScene(Stage primaryStage) {
-        var pane = new Pane();
-        pane.getChildren().add(new Label("Not done"));
-        return new Scene(pane, 800, 800);
+    private Scene createGameScene(Stage primaryStage, Stack<Scene> sceneHistory) {
+        return GameRenderer.createGameScene(primaryStage, sceneHistory);
     }
 
-    private Scene createLevelSelectScene(Stage primaryStage) {
+    private Scene createLevelSelectScene(Stage primaryStage, Stack<Scene> sceneHistory) {
         var pane = new Pane();
         pane.getChildren().add(new Label("Not done"));
-        return new Scene(pane, 800, 800);
+        
+        var scene = new Scene(pane, 800, 800);
+        sceneHistory.push(scene);
+
+        return scene;
     }
 
     private Button createButton(String text, double size, double padding) {

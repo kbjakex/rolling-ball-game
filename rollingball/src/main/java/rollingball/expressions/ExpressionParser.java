@@ -3,6 +3,7 @@ package rollingball.expressions;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Supplier;
 
 import rollingball.expressions.Expressions.Expr;
 import rollingball.expressions.Expressions.Op;
@@ -29,7 +30,7 @@ public final class ExpressionParser {
         var posBefore = srcPos;
 
         var result = 0.0;
-        var isNegative = !consume('+') && consume('-');
+        var isNegative = consume('-');
 
         while (srcPos < src.length && Character.isDigit(src[srcPos])) {
             result = result * 10 + (src[srcPos] - '0');
@@ -57,6 +58,15 @@ public final class ExpressionParser {
         return Expr.constant(result);
     }
 
+    private String parseIdentifier() {
+        var posBefore = srcPos;
+        while (srcPos < src.length && Character.isJavaIdentifierPart(src[srcPos])) {
+            srcPos++;
+        }
+
+        return new String(src, posBefore, srcPos - posBefore);
+    }
+
     private Expr parseOperand() {
         if (consume('(')) {
             var result = parseExpr();
@@ -64,11 +74,40 @@ public final class ExpressionParser {
             return result;
         }
 
+        if (hasNext() && Character.isAlphabetic(src[srcPos])) {
+            var name = parseIdentifier();
+            if (consume('(')) {
+                var firstParam = parseExpr();
+                Supplier<Expr> paramSupplier = () -> {
+                    expect(',', "Missing comma between function parameters");
+                    return parseExpr();
+                };
+
+                var result = Functions.parseFunctionCall(name, firstParam, paramSupplier);
+                expect(')', "Missing closing ')'");
+                return result;
+            }
+            // Variable
+            return switch (name) {
+                case "x" -> ctx -> ctx.varX;
+                case "t" -> ctx -> ctx.varT;
+                case "pi", "PI" -> Expr.constant(Math.PI);
+                case "e", "E" -> Expr.constant(Math.E);
+                default -> throw new ParserException("Unknown variable '%s', only 'x', 't', 'pi' and 'e' are allowed", name);
+            };
+        }
+
         return parseConstant();        
     }
 
     private Op tryParseOperator() {
         if (!hasNext()) return null;
+
+        // Implicit multiplication sign before identifiers, e.g. `5x`, `3sin(x)`, `3x^2` etc.
+        if (Character.isAlphabetic(src[srcPos])) {
+            return Op.MUL;
+        }
+
         return switch (src[srcPos++]) {
             case '+' -> Op.ADD;
             case '-' -> Op.SUB;
@@ -109,9 +148,6 @@ public final class ExpressionParser {
             mergeTopOfStack(operandStack, operatorStack);
         }
 
-        if (!operatorStack.isEmpty()) throw new ParserException("Mismatched parentheses; found closing ')' but expression had %d unmatched operators", operatorStack.size());
-        if (operandStack.size() > 1) throw new ParserException("Mismatched parentheses; found closing ')' but expression had %d unmatched operands", operandStack.size() - 1);
-
         return operandStack.get(0);
     }
 
@@ -120,11 +156,11 @@ public final class ExpressionParser {
         var rhs = operandStack.remove(operandStack.size()-1);
         var lhs = operandStack.remove(operandStack.size()-1);
 
-        var lhsAsConstant = lhs.tryConstEvaluate();
-        var rhsAsConstant = rhs.tryConstEvaluate();
-        if (lhsAsConstant != null && rhsAsConstant != null) { // Auto-reduce when possible
-            operandStack.add(Expr.constant(mergedOp.apply(lhsAsConstant, rhsAsConstant)));
-        } else { 
+        var expr = Expr.binary(mergedOp, lhs, rhs);
+        var constEvaluated = expr.tryConstEvaluate();
+        if (constEvaluated != null) {
+            operandStack.add(Expr.constant(constEvaluated));
+        } else {
             operandStack.add(Expr.binary(mergedOp, lhs, rhs));
         }
     }

@@ -1,16 +1,13 @@
 package rollingball.expressions;
 
-import java.util.function.ToDoubleFunction;
-
 public final class Expressions {
     private Expressions() {} // Make non-instantiable
 
     public static final class EvalContext {
-        public final double varX;
         public final double varT;
+        public double varX;
 
-        public EvalContext(double varX, double varT) {
-            this.varX = varX;
+        public EvalContext(double varT) {
             this.varT = varT;
         }
     }
@@ -33,9 +30,13 @@ public final class Expressions {
         }
     }
 
+    @FunctionalInterface
     public interface Expr {
         double evaluate(EvalContext ctx);
-        Double tryConstEvaluate();
+        
+        default Double tryConstEvaluate() {
+            return null;
+        }
 
         static Expr constant(double val) {
             return new Expr() {
@@ -43,7 +44,7 @@ public final class Expressions {
                 public double evaluate(EvalContext ctx) {
                     return val;
                 }
-
+                
                 @Override
                 public Double tryConstEvaluate() {
                     return val;
@@ -51,21 +52,23 @@ public final class Expressions {
             };
         }
 
-        static Expr runtimeEvaluatable(ToDoubleFunction<EvalContext> eval) {
+        static Expr binary(Op op, Expr lhs, Expr rhs) {
             return new Expr() {
                 @Override
                 public double evaluate(EvalContext ctx) {
-                    return eval.applyAsDouble(ctx);
+                    return op.apply(lhs.evaluate(ctx), rhs.evaluate(ctx));
                 }
-
+                
                 @Override
                 public Double tryConstEvaluate() {
+                    var lhsAsConst = lhs.tryConstEvaluate();
+                    var rhsAsConst = rhs.tryConstEvaluate();
+                    if (lhsAsConst != null && rhsAsConst != null) {
+                        return op.apply(lhsAsConst, rhsAsConst);
+                    }
                     return null;
                 }
             };
-        }
-        static Expr binary(Op op, Expr lhs, Expr rhs) {
-            return runtimeEvaluatable(ctx -> op.apply(lhs.evaluate(ctx), rhs.evaluate(ctx)));
         }
     }
 }
