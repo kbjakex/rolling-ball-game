@@ -19,15 +19,20 @@ Peli käynnistyy "päävalikkoon", josta päästään joko jatkamaan aiempaa pel
 - käyttäjä voi navigoida näkymästä toiseen eli selata kenttiä ja aloittaa pelaamisen
 - käyttäjä näkee kenttävalikkonäkymästä oman edistymisensä
 - käyttäjä voi jatkaa päävalikon "start"-painikketta käyttäen siitä kentästä, mihin viime pelikerralla jäi, tai ensimmäisestä, jos ei ole ennen pelannut
-- käyttäjä voi syöttää pelinäkymässä yhtälöitä muotoa `y = f(x)` tai `x = f(y)`, jotka piirtyvät pelikentälle ja joiden päällä pallo voi pyöriä
-- käyttäjä voi poistaa ja muokata aiemmin lisäämiään yhtälöitä
-- yhtälöt voisivat sisältää muuttujan `t`, mikä kuvastaa aikaa. Muuttujan arvo kasvaa monotonisesti ja alkaa aina suoritusyrityksen alkaessa nollasta
+- käyttäjä voi syöttää pelinäkymässä yhtälöitä muotoa `y = f(x)` tai `x = f(y)`
+- yhtälöt piirtyvät pelikentälle graafisen laskimen tapaan
+- pelin pallohahmo voi pyöriä näiden yhtälöiden muodostamien käyrien päällä
+- käyttäjä voi poistaa aiemmin lisäämiään yhtälöitä
+- käyttäjä voi muokata aiemmin lisäämiään yhtälöitä
+- yhtälöt voivat sisältää muuttujan `t`, mikä kuvastaa aikaa
+- muuttujan `t` arvo kasvaa monotonisesti ja alkaa aina suoritusyrityksen alkaessa nollasta
 - yhtälöitä voi rajata esim. välille `1 <= x <= 3` lisäämällä yhtälön perään `| (rajaus)`. Esimerkki: `y = sin(x) | 0 <= x <= 2*PI`
-- käyttäjä voi hävitä pelin mm. pallon tippuessa pois pelialueelta tai törmäämällä esteeseen
+- käyttäjä voi hävitä pelin a) pallon tippuessa pois pelialueelta tai b) törmäämällä esteeseen
 - käyttäjä voi kenttiä ratkaisemalla "avata" uusia kenttiä pelattavaksi
 - käyttäjä näkee kenttävalikkonäkymästä kenttäkohtaisen suorituksensa, mikä arvioidaan tähdillä (0-3 tähteä), joiden määrä lasketaan ensisijaisesti käytettyjen yhtälöiden määrästä (täydet kolme saa vain yhdellä yhtälöllä) ja toissijaisesti pallon kulkemisajan perusteella.
 - sovellus sisältää vähintään 5 kenttää
-- sovellus tallentaa käyttäjän edistymisen sovellusbinäärin kanssa samaan kansioon binääritiedostoon "rollingballdata.dat" ja lataa tiedoston sisällön käynnistyessä
+- sovellus tallentaa käyttäjän edistymisen sovellusbinäärin kanssa samaan kansioon binääritiedostoon "rollingballdata.dat"
+- sovellus lataa `rollingballdata.dat` tiedoston sisällön käynnistyessä
 
 ## Jatkokehitysideoita
 
