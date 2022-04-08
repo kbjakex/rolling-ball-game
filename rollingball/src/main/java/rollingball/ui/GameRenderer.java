@@ -79,8 +79,9 @@ public final class GameRenderer {
             evalCtx.varX = -GRAPH_AREA_WIDTH;
             graphics.moveTo(-GRAPH_AREA_WIDTH_PX, -PX_PER_GRAPH_AREA_UNIT * graph.fn.evaluate(evalCtx));
 
-            var renderX = -GRAPH_AREA_WIDTH_PX + 2;
-            for (int i = 1; i <= GRAPH_AREA_WIDTH_PX; ++i) {
+            var renderX = -GRAPH_AREA_WIDTH_PX+2;
+            for (int i = 2; i <= GRAPH_AREA_WIDTH_PX; ++i) {
+                evalCtx.varX = i / GRAPH_AREA_WIDTH_PX * GRAPH_AREA_WIDTH;
                 var y = graph.fn.evaluate(evalCtx) * -PX_PER_GRAPH_AREA_UNIT; // up is negative in screen coords
                 graphics.lineTo(renderX, y);
 

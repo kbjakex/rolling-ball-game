@@ -15,9 +15,13 @@ public final class Expressions {
     public enum Op {
         ADD(1), SUB(1), MUL(2), DIV(2);
 
-        public final int precedence;
+        private final int precedence;
         private Op(int precedence) {
             this.precedence = precedence;
+        }
+
+        public int getPrecedence() {
+            return this.precedence;
         }
 
         public double apply(double lhs, double rhs) {
@@ -48,25 +52,6 @@ public final class Expressions {
                 @Override
                 public Double tryConstEvaluate() {
                     return val;
-                }
-            };
-        }
-
-        static Expr binary(Op op, Expr lhs, Expr rhs) {
-            return new Expr() {
-                @Override
-                public double evaluate(EvalContext ctx) {
-                    return op.apply(lhs.evaluate(ctx), rhs.evaluate(ctx));
-                }
-                
-                @Override
-                public Double tryConstEvaluate() {
-                    var lhsAsConst = lhs.tryConstEvaluate();
-                    var rhsAsConst = rhs.tryConstEvaluate();
-                    if (lhsAsConst != null && rhsAsConst != null) {
-                        return op.apply(lhsAsConst, rhsAsConst);
-                    }
-                    return null;
                 }
             };
         }

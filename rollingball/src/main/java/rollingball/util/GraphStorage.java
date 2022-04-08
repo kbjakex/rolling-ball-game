@@ -20,6 +20,14 @@ public final class GraphStorage {
             this.fn = fn;
             this.color = color;
         }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof Graph graph) {
+                return this.id == graph.id;
+            }
+            return false;
+        }
     }
 
     private final List<Graph> graphs;
@@ -35,7 +43,7 @@ public final class GraphStorage {
     public Graph addGraph(Expr expr) {
         var id = computeNewGraphId();
         var color = computeColorFor(id);
-        var graph = new Graph(graphId++, expr, color);
+        var graph = new Graph(id, expr, color);
         graphs.add(graph);
         return graph;
     }

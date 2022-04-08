@@ -1,7 +1,9 @@
 package rollingball;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import org.junit.jupiter.api.Test;
 
@@ -40,12 +42,25 @@ public class ExpressionParserTest {
 
     @Test
     public void testEmptyConstantThrows() {
-        assertThrows(ParserException.class, () -> ExpressionParser.parse("1.0+")); // empty constant after +
+        assertThrowsExactly(ParserException.class, () -> ExpressionParser.parse("1.0+")); // empty constant after +
     }
 
     @Test
     public void testEmptyExpressionReturnsNull() {
         assertEquals(null, ExpressionParser.parse(""));
+    }
+
+    @Test
+    public void testUnaryOperatorsWork() {
+        assertEquals(-1.0, ExpressionParser.parse("-(3-2)").evaluate(null), EPSILON);
+        assertEquals(2.0, ExpressionParser.parse("-(3-5)").evaluate(null), EPSILON);
+    }
+
+    @Test
+    public void testDivByZero() {
+        assertEquals(Double.POSITIVE_INFINITY, ExpressionParser.parse("1/0").evaluate(null), EPSILON);
+        assertEquals(Double.NEGATIVE_INFINITY, ExpressionParser.parse("-1/0").evaluate(null), EPSILON);
+        assertEquals(Double.NaN, ExpressionParser.parse("0/0").evaluate(null), EPSILON);
     }
 
     @Test
@@ -80,7 +95,7 @@ public class ExpressionParserTest {
 
     @Test
     public void testMismatchesParenthesesThrows() {
-        assertThrows(ParserException.class, () -> ExpressionParser.parse("(3 + 5) * (3 - 5").evaluate(null));
+        assertThrowsExactly(ParserException.class, () -> ExpressionParser.parse("(3 + 5) * (3 - 5").evaluate(null));
     }
 
     @Test
@@ -111,7 +126,7 @@ public class ExpressionParserTest {
 
     @Test
     public void testUnrecognizedVariablesThrow() {
-        assertThrows(ParserException.class, () -> ExpressionParser.parse("a").evaluate(null));
+        assertThrowsExactly(ParserException.class, () -> ExpressionParser.parse("a").evaluate(null));
     }
 
     @Test
@@ -120,6 +135,7 @@ public class ExpressionParserTest {
         ctx.varX = 3*Math.PI/2;
         assertEquals(2*ctx.varX, ExpressionParser.parse("2x").evaluate(ctx), EPSILON);
         assertEquals(-3.0, ExpressionParser.parse("-3sin(3x)").evaluate(ctx), EPSILON);
+        assertEquals(12*Math.PI, ExpressionParser.parse("(5+3)x").evaluate(ctx), EPSILON);
     }
 
     @Test
@@ -127,24 +143,37 @@ public class ExpressionParserTest {
         assertEquals(Math.sin(3+5), ExpressionParser.parse("sin(3+5)").evaluate(null), EPSILON);
         assertEquals(Math.cos(3+5), ExpressionParser.parse("cos(3+5)").evaluate(null), EPSILON);
         assertEquals(Math.tan(3+5), ExpressionParser.parse("tan(3+5)").evaluate(null), EPSILON);
+        
         assertEquals(Math.asin(3+5), ExpressionParser.parse("asin(3+5)").evaluate(null), EPSILON);
+        assertEquals(Math.asin(3+5), ExpressionParser.parse("arcsin(3+5)").evaluate(null), EPSILON);
+        
         assertEquals(Math.acos(3+5), ExpressionParser.parse("acos(3+5)").evaluate(null), EPSILON);
+        assertEquals(Math.acos(3+5), ExpressionParser.parse("arccos(3+5)").evaluate(null), EPSILON);
+        
         assertEquals(Math.atan(3+5), ExpressionParser.parse("atan(3+5)").evaluate(null), EPSILON);
+        assertEquals(Math.atan(3+5), ExpressionParser.parse("arctan(3+5)").evaluate(null), EPSILON);
+
         assertEquals(Math.sinh(3+5), ExpressionParser.parse("sinh(3+5)").evaluate(null), EPSILON);
         assertEquals(Math.cosh(3+5), ExpressionParser.parse("cosh(3+5)").evaluate(null), EPSILON);
         assertEquals(Math.tanh(3+5), ExpressionParser.parse("tanh(3+5)").evaluate(null), EPSILON);
+
         assertEquals(Math.exp(3+5), ExpressionParser.parse("exp(3+5)").evaluate(null), EPSILON);
         assertEquals(Math.log(3+5), ExpressionParser.parse("log(3+5)").evaluate(null), EPSILON);
+        assertEquals(Math.log(3+5), ExpressionParser.parse("ln(3+5)").evaluate(null), EPSILON);
         assertEquals(Math.log10(3+5), ExpressionParser.parse("log10(3+5)").evaluate(null), EPSILON);
+        assertEquals(Math.log10(3+5), ExpressionParser.parse("lg(3+5)").evaluate(null), EPSILON);
+        
         assertEquals(Math.sqrt(3+5), ExpressionParser.parse("sqrt(3+5)").evaluate(null), EPSILON);
         assertEquals(Math.cbrt(3+5), ExpressionParser.parse("cbrt(3+5)").evaluate(null), EPSILON);
+        
         assertEquals(Math.abs(3-5), ExpressionParser.parse("abs(3-5)").evaluate(null), EPSILON);
+        assertEquals(Math.signum(3-5), ExpressionParser.parse("sign(3-5)").evaluate(null), EPSILON);
+        assertEquals(Math.signum(5-3), ExpressionParser.parse("signum(5-3)").evaluate(null), EPSILON);
+        
         assertEquals(Math.floor(3.5), ExpressionParser.parse("floor(3.5)").evaluate(null), EPSILON);
         assertEquals(Math.ceil(3.5), ExpressionParser.parse("ceil(3.5)").evaluate(null), EPSILON);
         assertEquals(Math.round(3.49), ExpressionParser.parse("round(3.49)").evaluate(null), EPSILON);
         assertEquals(Math.round(3.5), ExpressionParser.parse("round(3.5)").evaluate(null), EPSILON);
-        assertEquals(Math.signum(3-5), ExpressionParser.parse("sign(3-5)").evaluate(null), EPSILON);
-        assertEquals(Math.signum(5-3), ExpressionParser.parse("signum(5-3)").evaluate(null), EPSILON);
     }
 
     @Test
@@ -158,19 +187,18 @@ public class ExpressionParserTest {
 
     @Test
     public void testUnrecognizedFunctionThrows() {
-        assertThrows(ParserException.class, () -> ExpressionParser.parse("random(3)").evaluate(null));
+        assertThrowsExactly(ParserException.class, () -> ExpressionParser.parse("random(3)").evaluate(null));
     }
 
     @Test
     public void testMissingParameterThrows() {
-        assertThrows(ParserException.class, () -> ExpressionParser.parse("atan2(0)").evaluate(null));
-        assertThrows(ParserException.class, () -> ExpressionParser.parse("atan2(0,)").evaluate(null));
+        assertThrowsExactly(ParserException.class, () -> ExpressionParser.parse("atan2(0)").evaluate(null));
+        assertThrowsExactly(ParserException.class, () -> ExpressionParser.parse("atan2(0,)").evaluate(null));
     }
 
     @Test
     public void trailingContentsThrows() {
-        assertThrows(ParserException.class, () -> ExpressionParser.parse("(5+3))").evaluate(null));
-        assertThrows(ParserException.class, () -> ExpressionParser.parse("(5+3)3").evaluate(null));
-        assertThrows(ParserException.class, () -> ExpressionParser.parse("(5+3)x").evaluate(null));
+        assertThrowsExactly(ParserException.class, () -> ExpressionParser.parse("(5+3))").evaluate(null));
+        assertThrowsExactly(ParserException.class, () -> ExpressionParser.parse("(5+3)3").evaluate(null));
     }
 }

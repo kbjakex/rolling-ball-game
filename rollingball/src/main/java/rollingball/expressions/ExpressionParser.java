@@ -30,7 +30,6 @@ public final class ExpressionParser {
         var posBefore = srcPos;
 
         var result = 0.0;
-        var isNegative = consume('-');
 
         while (srcPos < src.length && Character.isDigit(src[srcPos])) {
             result = result * 10 + (src[srcPos] - '0');
@@ -45,10 +44,6 @@ public final class ExpressionParser {
                 srcPos++;
             }
 
-        }
-
-        if (isNegative) {
-            result = -result;
         }
 
         if (posBefore == srcPos) {
@@ -67,7 +62,7 @@ public final class ExpressionParser {
         return new String(src, posBefore, srcPos - posBefore);
     }
 
-    private Expr parseOperand() {
+    private Expr parseOperandInner() {
         if (consume('(')) {
             var result = parseExpr();
             expect(')', "Missing closing ')'");
@@ -97,7 +92,18 @@ public final class ExpressionParser {
             };
         }
 
-        return parseConstant();        
+        return parseConstant();
+    }
+
+    private Expr parseOperand() {
+        var negate = consume('-');
+        var result = parseOperandInner();
+
+        if (negate) {
+            return ctx -> -result.evaluate(ctx);
+        } else {
+            return result;
+        }
     }
 
     private Op tryParseOperator() {
@@ -124,7 +130,9 @@ public final class ExpressionParser {
         var root = parseOperand();
         
         var op = tryParseOperator();
-        if (op == null) return root;
+        if (op == null) {
+            return root;
+        }
         
         var operatorStack = new ArrayList<Op>();
         operatorStack.add(op);
@@ -136,7 +144,7 @@ public final class ExpressionParser {
         while ((op = tryParseOperator()) != null) {
             var operand = parseOperand();
 
-            while (!operatorStack.isEmpty() && op.precedence <= operatorStack.get(operatorStack.size()-1).precedence) {
+            while (!operatorStack.isEmpty() && op.getPrecedence() <= operatorStack.get(operatorStack.size()-1).getPrecedence()) {
                 mergeTopOfStack(operandStack, operatorStack);
             }
 
@@ -156,12 +164,17 @@ public final class ExpressionParser {
         var rhs = operandStack.remove(operandStack.size()-1);
         var lhs = operandStack.remove(operandStack.size()-1);
 
-        var expr = Expr.binary(mergedOp, lhs, rhs);
-        var constEvaluated = expr.tryConstEvaluate();
-        if (constEvaluated != null) {
-            operandStack.add(Expr.constant(constEvaluated));
+        var lhsConstEval = lhs.tryConstEvaluate();
+        var rhsConstEval = rhs.tryConstEvaluate();
+        if (lhsConstEval != null && rhsConstEval != null) {
+            operandStack.add(Expr.constant(mergedOp.apply(lhsConstEval, rhsConstEval)));
         } else {
-            operandStack.add(Expr.binary(mergedOp, lhs, rhs));
+            operandStack.add(switch (mergedOp) {
+                case ADD -> ctx -> lhs.evaluate(ctx) + rhs.evaluate(ctx);
+                case SUB -> ctx -> lhs.evaluate(ctx) - rhs.evaluate(ctx);
+                case MUL -> ctx -> lhs.evaluate(ctx) * rhs.evaluate(ctx);
+                case DIV -> ctx -> lhs.evaluate(ctx) / rhs.evaluate(ctx);
+            });
         }
     }
 
@@ -193,7 +206,11 @@ public final class ExpressionParser {
         var dense = removeWhitespace(expression);
         if (dense.length == 0) return null;
 
-        return new ExpressionParser(dense).parse();
+        var parser = new ExpressionParser(dense);
+        var result = parser.parse();
+        if (parser.srcPos != dense.length) throw new ParserException("Trailing content: '%s'", new String(dense, parser.srcPos, dense.length - parser.srcPos));
+
+        return result;
     }
 
     public static char[] removeWhitespace(String expr) {
