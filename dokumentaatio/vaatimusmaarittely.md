@@ -16,15 +16,15 @@ Peli käynnistyy "päävalikkoon", josta päästään joko jatkamaan aiempaa pel
 
 ## Perusversion tarjoama toiminnallisuus
 
-- käyttäjä voi navigoida näkymästä toiseen eli selata kenttiä ja aloittaa pelaamisen
+- käyttäjä voi navigoida näkymästä toiseen eli selata kenttiä ja aloittaa pelaamisen (etusivun toiminnallisuus valmis)
 - käyttäjä näkee kenttävalikkonäkymästä oman edistymisensä
 - käyttäjä voi jatkaa päävalikon "start"-painikketta käyttäen siitä kentästä, mihin viime pelikerralla jäi, tai ensimmäisestä, jos ei ole ennen pelannut
-- käyttäjä voi syöttää pelinäkymässä yhtälöitä muotoa `y = f(x)` tai `x = f(y)`
-- yhtälöt piirtyvät pelikentälle graafisen laskimen tapaan
+- käyttäjä voi syöttää pelinäkymässä yhtälöitä muotoa `y = f(x)` tai `x = f(y)` (tehty)
+- yhtälöt piirtyvät pelikentälle graafisen laskimen tapaan (tehty)
 - pelin pallohahmo voi pyöriä näiden yhtälöiden muodostamien käyrien päällä
-- käyttäjä voi poistaa aiemmin lisäämiään yhtälöitä
+- käyttäjä voi poistaa aiemmin lisäämiään yhtälöitä (tehty)
 - käyttäjä voi muokata aiemmin lisäämiään yhtälöitä
-- yhtälöt voivat sisältää muuttujan `t`, mikä kuvastaa aikaa
+- yhtälöt voivat sisältää muuttujan `t`, mikä kuvastaa aikaa (tehty)
 - muuttujan `t` arvo kasvaa monotonisesti ja alkaa aina suoritusyrityksen alkaessa nollasta
 - yhtälöitä voi rajata esim. välille `1 <= x <= 3` lisäämällä yhtälön perään `| (rajaus)`. Esimerkki: `y = sin(x) | 0 <= x <= 2*PI`
 - käyttäjä voi hävitä pelin a) pallon tippuessa pois pelialueelta tai b) törmäämällä esteeseen
