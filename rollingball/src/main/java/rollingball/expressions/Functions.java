@@ -14,10 +14,14 @@ public final class Functions {
         if ((result = tryParseTrigonometric(name, firstParam)) != null) {
             return result;
         }
-        if ((result = tryParseMisc(name, firstParam)) != null) {
+        if ((result = tryParseMiscellaneous(name, firstParam)) != null) {
             return result;
         }
-        return parseMultiParamFunctionCall(name, firstParam, paramSupplier.get());
+        if ((result = tryParseMultiParam(name, firstParam, paramSupplier.get())) != null) {
+            return result;
+        }
+
+        throw new ParserException("Unknown function: '" + name + "'");
     }
 
     private static Expr tryParseTrigonometric(String name, Expr param) {
@@ -35,7 +39,7 @@ public final class Functions {
         };
     }
 
-    private static Expr tryParseMisc(String name, Expr param) {
+    private static Expr tryParseMiscellaneous(String name, Expr param) {
         return switch (name.toLowerCase()) {
             case "exp" -> ctx -> Math.exp(param.evaluate(ctx));
             case "log", "ln" -> ctx -> Math.log(param.evaluate(ctx));
@@ -51,18 +55,18 @@ public final class Functions {
         };
     }
 
-    private static Expr parseMultiParamFunctionCall(String name, Expr firstParam, Expr secondParam) {
+    private static Expr tryParseMultiParam(String name, Expr param1, Expr param2) {
         return switch (name) {
-            case "min" -> ctx -> Math.min(firstParam.evaluate(ctx), secondParam.evaluate(ctx));
-            case "max" -> ctx -> Math.max(firstParam.evaluate(ctx), secondParam.evaluate(ctx));
-            case "pow" -> ctx -> Math.pow(firstParam.evaluate(ctx), secondParam.evaluate(ctx));
-            case "atan2" -> ctx -> Math.atan2(firstParam.evaluate(ctx), secondParam.evaluate(ctx));
+            case "min" -> ctx -> Math.min(param1.evaluate(ctx), param2.evaluate(ctx));
+            case "max" -> ctx -> Math.max(param1.evaluate(ctx), param2.evaluate(ctx));
+            case "pow" -> ctx -> Math.pow(param1.evaluate(ctx), param2.evaluate(ctx));
+            case "atan2" -> ctx -> Math.atan2(param1.evaluate(ctx), param2.evaluate(ctx));
             case "hypot" -> ctx -> {
-                var x1 = firstParam.evaluate(ctx);
-                var x2 = secondParam.evaluate(ctx);
+                var x1 = param1.evaluate(ctx);
+                var x2 = param2.evaluate(ctx);
                 return Math.sqrt(x1 * x1 + x2 * x2);
             };
-            default -> throw new ParserException("Unknown function: '" + name + "'");
+            default -> null;
         };
     }
 }
