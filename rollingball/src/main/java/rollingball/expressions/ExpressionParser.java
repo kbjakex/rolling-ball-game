@@ -28,7 +28,6 @@ public final class ExpressionParser {
 
     private Expr parseConstant() {
         var posBefore = srcPos;
-
         var result = 0.0;
 
         while (srcPos < src.length && Character.isDigit(src[srcPos])) {
@@ -43,7 +42,6 @@ public final class ExpressionParser {
                 frac *= 0.1;
                 srcPos++;
             }
-
         }
 
         if (posBefore == srcPos) {
@@ -62,6 +60,34 @@ public final class ExpressionParser {
         return new String(src, posBefore, srcPos - posBefore);
     }
 
+    private Expr parseFuncCall(String name) {
+        var firstParam = parseExpr();
+        Supplier<Expr> paramSupplier = () -> {
+            expect(',', "Missing comma between function parameters");
+            return parseExpr();
+        };
+
+        var result = Functions.parseFunctionCall(name, firstParam, paramSupplier);
+        expect(')', "Missing closing ')'");
+        return result;
+    }
+
+    private Expr parseVariableOrFuncCall() {
+        var name = parseIdentifier();
+        if (consume('(')) {
+            return parseFuncCall(name);
+        }
+
+        return switch (name) {
+            case "x" -> ctx -> ctx.varX;
+            case "t" -> ctx -> ctx.varT;
+            case "pi", "PI" -> Expr.constant(Math.PI);
+            case "e", "E" -> Expr.constant(Math.E);
+            default ->
+                throw new ParserException("Unknown variable '%s', only 'x', 't', 'pi' and 'e' are allowed", name);
+        };
+    }
+
     private Expr parseOperandInner() {
         if (consume('(')) {
             var result = parseExpr();
@@ -70,26 +96,7 @@ public final class ExpressionParser {
         }
 
         if (hasNext() && Character.isAlphabetic(src[srcPos])) {
-            var name = parseIdentifier();
-            if (consume('(')) {
-                var firstParam = parseExpr();
-                Supplier<Expr> paramSupplier = () -> {
-                    expect(',', "Missing comma between function parameters");
-                    return parseExpr();
-                };
-
-                var result = Functions.parseFunctionCall(name, firstParam, paramSupplier);
-                expect(')', "Missing closing ')'");
-                return result;
-            }
-            // Variable
-            return switch (name) {
-                case "x" -> ctx -> ctx.varX;
-                case "t" -> ctx -> ctx.varT;
-                case "pi", "PI" -> Expr.constant(Math.PI);
-                case "e", "E" -> Expr.constant(Math.E);
-                default -> throw new ParserException("Unknown variable '%s', only 'x', 't', 'pi' and 'e' are allowed", name);
-            };
+            return parseVariableOrFuncCall();
         }
 
         return parseConstant();
@@ -107,9 +114,12 @@ public final class ExpressionParser {
     }
 
     private Op tryParseOperator() {
-        if (!hasNext()) return null;
+        if (!hasNext()) {
+            return null;
+        }
 
-        // Implicit multiplication sign before identifiers, e.g. `5x`, `3sin(x)`, `3x^2` etc.
+        // Implicit multiplication sign before identifiers, e.g. `5x`, `3sin(x)`, `3x^2`
+        // etc.
         if (Character.isAlphabetic(src[srcPos])) {
             return Op.MUL;
         }
@@ -126,25 +136,19 @@ public final class ExpressionParser {
         };
     }
 
-    private Expr parseExpr() {
-        var root = parseOperand();
-        
-        var op = tryParseOperator();
-        if (op == null) {
-            return root;
-        }
-        
+    private Expr parseComplexExpr(Expr firstOperand, Op firstOp) {
         var operatorStack = new ArrayList<Op>();
-        operatorStack.add(op);
+        operatorStack.add(firstOp);
 
         var operandStack = new ArrayList<Expr>();
-        operandStack.add(root);
+        operandStack.add(firstOperand);
         operandStack.add(parseOperand());
 
+        Op op;
         while ((op = tryParseOperator()) != null) {
             var operand = parseOperand();
 
-            while (!operatorStack.isEmpty() && op.getPrecedence() <= operatorStack.get(operatorStack.size()-1).getPrecedence()) {
+            while (!operatorStack.isEmpty() && op.getPrecedence() <= operatorStack.get(operatorStack.size() - 1).getPrecedence()) {
                 mergeTopOfStack(operandStack, operatorStack);
             }
 
@@ -159,27 +163,41 @@ public final class ExpressionParser {
         return operandStack.get(0);
     }
 
+    private Expr parseExpr() {
+        var root = parseOperand();
+
+        var op = tryParseOperator();
+        if (op != null) {
+            return parseComplexExpr(root, op);
+        }
+        
+        return root;
+    }
+
     private void mergeTopOfStack(List<Expr> operandStack, List<Op> operatorStack) {
-        var mergedOp = operatorStack.remove(operatorStack.size()-1);
-        var rhs = operandStack.remove(operandStack.size()-1);
-        var lhs = operandStack.remove(operandStack.size()-1);
+        var mergedOp = operatorStack.remove(operatorStack.size() - 1);
+        var rhs = operandStack.remove(operandStack.size() - 1);
+        var lhs = operandStack.remove(operandStack.size() - 1);
 
         var lhsConstEval = lhs.tryConstEvaluate();
         var rhsConstEval = rhs.tryConstEvaluate();
         if (lhsConstEval != null && rhsConstEval != null) {
             operandStack.add(Expr.constant(mergedOp.apply(lhsConstEval, rhsConstEval)));
         } else {
-            operandStack.add(switch (mergedOp) {
+            Expr expr = switch (mergedOp) {
                 case ADD -> ctx -> lhs.evaluate(ctx) + rhs.evaluate(ctx);
                 case SUB -> ctx -> lhs.evaluate(ctx) - rhs.evaluate(ctx);
                 case MUL -> ctx -> lhs.evaluate(ctx) * rhs.evaluate(ctx);
                 case DIV -> ctx -> lhs.evaluate(ctx) / rhs.evaluate(ctx);
-            });
+            };
+            operandStack.add(expr);
         }
     }
 
     private void expect(char type, String format, Object... args) {
-        if (!consume(type)) throw new ParserException(format, args);
+        if (!consume(type)) {
+            throw new ParserException(format, args);
+        }
     }
 
     private boolean consume(char type) {
@@ -204,11 +222,16 @@ public final class ExpressionParser {
 
     public static Expr parse(String expression) {
         var dense = removeWhitespace(expression);
-        if (dense.length == 0) return null;
+        if (dense.length == 0) {
+            return null;
+        }
 
         var parser = new ExpressionParser(dense);
         var result = parser.parse();
-        if (parser.srcPos != dense.length) throw new ParserException("Trailing content: '%s'", new String(dense, parser.srcPos, dense.length - parser.srcPos));
+        if (parser.srcPos != dense.length) {
+            throw new ParserException("Trailing content: '%s'",
+                    new String(dense, parser.srcPos, dense.length - parser.srcPos));
+        }
 
         return result;
     }
@@ -217,10 +240,12 @@ public final class ExpressionParser {
         var result = new char[expr.length()];
         var i = 0;
         for (var c : expr.toCharArray()) {
-            if (Character.isWhitespace(c)) continue;
+            if (Character.isWhitespace(c)) {
+                continue;
+            }
             result[i++] = c;
         }
         return Arrays.copyOfRange(result, 0, i);
     }
-    
+
 }
