@@ -23,11 +23,13 @@ Testikattavuusraportti luodaan seuraavasti:
 ```console
 mvn jacoco:report
 ```
+Raportti luodaan tiedostoon `index.html` polussa `target/site/jacoco/`.
 
 Checkstyle-raportti luodaan seuraavasti:
 ```console
 mvn jxr:jxr checkstyle:checkstyle
 ```
+Raportti luodaan tiedostoon `checkstyle.html` polussa `target/site/`.
 
 ### Suoritus
 
@@ -39,8 +41,6 @@ ja ohjelman voi käynnistää suoraan komentoriviltä komennolla
 ```console
 mvn compile exec:java -Dexec.mainClass=rollingball.ui.RollingBall
 ```
-
-Kattavuusraportti luodaan tiedostoon `index.html` polussa `target/site/jacoco/`.
 
 ## Javan versio
 
