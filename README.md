@@ -14,14 +14,30 @@ Meneillään on viikko 3, eli sovellus on vielä hyvin vaiheessa.
 
 Testit suoritetaan seuravasti:
 
-```
+```console
 mvn test
 ```
 
 Testikattavuusraportti luodaan seuraavasti:
 
-```
+```console
 mvn jacoco:report
+```
+
+Checkstyle-raportti luodaan seuraavasti:
+```console
+mvn jxr:jxr checkstyle:checkstyle
+```
+
+### Suoritus
+
+Suoritettavan jar-tiedoston voi generoida `target/`-kansioon komennolla
+```console
+mvn package
+```
+ja ohjelman voi käynnistää suoraan komentoriviltä komennolla
+```console
+mvn compile exec:java -Dexec.mainClass=rollingball.ui.RollingBall
 ```
 
 Kattavuusraportti luodaan tiedostoon `index.html` polussa `target/site/jacoco/`.
