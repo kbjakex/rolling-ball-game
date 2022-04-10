@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import javafx.scene.paint.Color;
 import rollingball.expressions.Expressions.Expr;
-import rollingball.util.GraphStorage;
+import rollingball.gamestate.GraphStorage;
 
 public class GraphStorageTest {
     private static final Expr DUMMY_EXPR = ctx -> 0.0;

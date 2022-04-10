@@ -30,7 +30,7 @@ import rollingball.expressions.ExpressionParser;
 import rollingball.expressions.Expressions;
 import rollingball.expressions.ExpressionParser.ParserException;
 import rollingball.expressions.Expressions.Expr;
-import rollingball.util.GraphStorage;
+import rollingball.gamestate.GraphStorage;
 
 public final class GameRenderer {
     private static final int GRAPH_AREA_WIDTH = 8; // -8..8 in both axes
