@@ -9,3 +9,4 @@
 | 7.4   | 7    | pään paukutusta seinään ongelman takia; ei ratkennut, suunnitelman muutos |
 | 7.4   | 2    | peli-ikkunadraft, voi syöttää ja poistaa yhtälöitä, jotka ohjelma nyt piirtää |
 | 8.4   | 3    | refaktorointia, testausten kirjoittamista, yhtälöt eri väreillä, tuki funktioille ja muuttujille |
+| 8.4   | 4    | lisää testejä, bugfixejä, Mavenin kanssa kamppailua, Checkstyle-integraatio + korjaukset |
