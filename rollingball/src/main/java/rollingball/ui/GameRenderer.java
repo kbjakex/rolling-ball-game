@@ -12,6 +12,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SplitPane;
@@ -31,6 +32,8 @@ import rollingball.expressions.Expressions;
 import rollingball.expressions.ExpressionParser.ParserException;
 import rollingball.expressions.Expressions.Expr;
 import rollingball.gamestate.GameState;
+import rollingball.gamestate.GoldenSectionSearch;
+import rollingball.gamestate.Level;
 
 public final class GameRenderer {
     private static final int GRAPH_AREA_WIDTH = 8; // -8..8
@@ -45,8 +48,6 @@ public final class GameRenderer {
 
     private final GameState state;
 
-    private int frameCount;
-
     private GameRenderer(Canvas canvas, GameState state) {
         this.canvas = canvas;
         this.state = state;
@@ -54,6 +55,8 @@ public final class GameRenderer {
     }
 
     private void onFrame(ActionEvent event) {
+        state.update();
+
         var canvasWidth = canvas.getWidth();
         var canvasHeight = canvas.getHeight();
         graphics.clearRect(0, 0, canvasWidth, canvasHeight);
@@ -63,11 +66,10 @@ public final class GameRenderer {
         drawGraphs();
 
         graphics.translate(-canvasWidth / 2, -canvasHeight / 2);
-        this.frameCount += 1;
     }
 
     private void drawGraphs() {
-        var evalCtx = new Expressions.EvalContext(frameCount * 0.1);
+        var evalCtx = new Expressions.EvalContext(state.getPlayingTimeMs() / 1000.0);
         var xStepSize = 2.0 / PX_PER_GRAPH_AREA_UNIT;
 
         graphics.setStroke(Color.BLACK);
@@ -79,7 +81,7 @@ public final class GameRenderer {
             evalCtx.varX = -GRAPH_AREA_WIDTH;
             graphics.moveTo(-GRAPH_AREA_WIDTH_PX, -PX_PER_GRAPH_AREA_UNIT * graph.fn.evaluate(evalCtx));
 
-            var renderX = -GRAPH_AREA_WIDTH_PX+2;
+            var renderX = -GRAPH_AREA_WIDTH_PX + 2;
             for (int i = 2; i <= GRAPH_AREA_WIDTH_PX; ++i) {
                 var y = graph.fn.evaluate(evalCtx) * -PX_PER_GRAPH_AREA_UNIT; // up is negative in screen coords
                 graphics.lineTo(renderX, y);
@@ -89,6 +91,15 @@ public final class GameRenderer {
             }
             graphics.stroke();
         }
+
+        graphics.setStroke(Color.BLACK);
+        graphics.setFill(Color.GRAY);
+        var ball = state.getBall();
+        var diameter = GoldenSectionSearch.BALL_RADIUS * PX_PER_GRAPH_AREA_UNIT * 2.0;
+        graphics.fillOval(
+                ball.getX() * PX_PER_GRAPH_AREA_UNIT - diameter / 2.0,
+                -ball.getY() * PX_PER_GRAPH_AREA_UNIT - diameter,
+                diameter, diameter);
     }
 
     private void drawGrid() {
@@ -115,18 +126,21 @@ public final class GameRenderer {
     }
 
     public static Scene createGameScene(Stage primaryStage, Stack<Scene> sceneHistory) {
-        var state = new GameState();
+        var state = new GameState(Level.LEVEL_1);
 
-        var desiredWidth = 800;Math.max(primaryStage.getWidth(), 2*GRAPH_AREA_WIDTH_PX);
-        var desiredHeight = 800;Math.max(primaryStage.getHeight(), 2*GRAPH_AREA_HEIGHT_PX+60);
+        var desiredWidth = 800;
+        Math.max(primaryStage.getWidth(), 2 * GRAPH_AREA_WIDTH_PX);
+        var desiredHeight = 800;
+        Math.max(primaryStage.getHeight(), 2 * GRAPH_AREA_HEIGHT_PX + 60);
 
         var canvas = new Canvas(desiredWidth, desiredHeight);
         primaryStage.widthProperty().addListener((obs, oldVal, newVal) -> canvas.setWidth(newVal.doubleValue()));
-        //primaryStage.heightProperty().addListener((obs, oldVal, newVal) -> canvas.setHeight(newVal.doubleValue()));
-        
+        // primaryStage.heightProperty().addListener((obs, oldVal, newVal) ->
+        // canvas.setHeight(newVal.doubleValue()));
+
         var canvasPane = new Pane(canvas);
         canvasPane.heightProperty().addListener((obs, oldVal, newVal) -> canvas.setHeight(newVal.doubleValue()));
-        
+
         var equationList = new ListView<HBox>();
         VBox.setVgrow(equationList, Priority.ALWAYS);
 
@@ -143,7 +157,7 @@ public final class GameRenderer {
         });
 
         addEquationButton.setOnAction(e -> addExpression(equationInput, equationList, state));
-        
+
         var equationControls = new HBox(equationInput, addEquationButton);
         equationControls.setPadding(new Insets(10.0));
         equationControls.setPrefWidth(Double.MAX_VALUE);
@@ -153,9 +167,32 @@ public final class GameRenderer {
         split.setOrientation(Orientation.VERTICAL);
 
         var backButton = new Button("Back");
-        backButton.setOnAction(e -> primaryStage.setScene(sceneHistory.pop()));
+        backButton.setOnAction(e -> {
+            if (!state.getGraphs().isEmpty()) {
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                alert.setTitle("Discard progress?");
+                alert.setHeaderText(
+                        "State saving functionality is not yet implemented and exiting will discard any current progress.");
+                alert.setContentText("Exit anyways?");
+                alert.showAndWait();
+
+                if (alert.getResult() == ButtonType.CANCEL) {
+                    return;
+                }
+            }
+
+            primaryStage.setScene(sceneHistory.pop());
+        });
 
         var playButton = new Button("Play");
+        playButton.setOnAction(e -> {
+            if (playButton.getText() == "Play")
+                playButton.setText("Stop");
+            else
+                playButton.setText("Play");
+
+            state.togglePlaying();
+        });
 
         var timeLabel = new Label("0.0");
 
@@ -183,7 +220,7 @@ public final class GameRenderer {
         if (expr == null) {
             return;
         }
-        
+
         equationInput.clear();
 
         var graph = state.addGraph(expr);

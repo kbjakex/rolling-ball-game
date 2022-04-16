@@ -3,17 +3,76 @@ package rollingball.gamestate;
 import java.util.List;
 
 import rollingball.expressions.Expressions.Expr;
+import rollingball.expressions.Expressions.EvalContext;
 import rollingball.gamestate.GraphStorage.Graph;
 
 public final class GameState {
-    private final GraphStorage graphs;
-    
-    public GameState() {
-        this.graphs = new GraphStorage();
+    public static final class Ball {
+        private double x;
+        private double y;
+
+        private double lastCollisionTimestamp;
+
+        public Ball(Level level) {
+            reset(level);
+        }
+
+        public double getX() {
+            return x;
+        }
+
+        public double getY() {
+            return y;
+        }
+
+        public void reset(Level level) {
+            this.x = level.startX;
+            this.y = level.startY;
+            this.lastCollisionTimestamp = 0.0;
+        }
     }
 
-    public void update() {
+    private static final double BALL_SPEED = 1.5; // grid units per second
+    private static final double GRAVITY = 0.67; // acceleration; grid units per second^2
 
+    private final GraphStorage graphs;
+
+    private Level level;
+
+    private double startTimeMs;
+    private boolean isPlaying;
+
+    private Ball theBall;
+
+    public GameState(Level level) {
+        this.graphs = new GraphStorage();
+        this.startTimeMs = 0.0;
+        this.isPlaying = false;
+        this.level = level;
+        this.theBall = new Ball(level);
+    }
+
+    public void togglePlaying() {
+        this.isPlaying = !this.isPlaying;
+        if (this.isPlaying) {
+            this.startTimeMs = System.nanoTime() / 1_000_000.0;
+        }
+        this.theBall.reset(this.level);
+    }
+
+    public double getPlayingTimeMs() {
+        if (!this.isPlaying) {
+            return 0.0;
+        }
+        return System.nanoTime() / 1_000_000.0 - this.startTimeMs;
+    }
+
+    public Ball getBall() {
+        return theBall;
+    }
+
+    public Level getLevel() {
+        return this.level;
     }
 
     public Graph addGraph(Expr fn) {
@@ -28,14 +87,37 @@ public final class GameState {
         return graphs.getGraphs();
     }
 
-}
+    public void update() {
+        if (this.isPlaying) {
+            var timeSeconds = (System.nanoTime() / 1_000_000.0 - this.startTimeMs) / 1000.0;
+            theBall.x = level.startX + timeSeconds * BALL_SPEED;
 
-/*             
-    var bx = (Math.sin(frameCount*0.01)*300) * GRAPH_AREA_WIDTH / GRAPH_AREA_WIDTH_PX;
-    var bx2 = GoldenSectionSearch.computeBallYOnCurve(graph.fn, evalCtx, bx);
-    var y = -bx2.y() * -PX_PER_GRAPH_AREA_UNIT;
-    var r = GoldenSectionSearch.BALL_RADIUS * PX_PER_GRAPH_AREA_UNIT;
-    graphics.setFill(graph.color);
-    graphics.fillOval(bx * PX_PER_GRAPH_AREA_UNIT - r, y - 2.0 * r, r * 2, r * 2);
-    graphics.setFill(Color.ORANGE); 
-*/
+            updateBallY(timeSeconds);
+        }
+    }
+
+    private void updateBallY(double time) {
+        var ctx = new EvalContext(time);
+
+        var nextY = theBall.y - computeGravity(time);
+        for (var graph : getGraphs()) {
+            ctx.varX = theBall.x;
+            var y = graph.fn.evaluate(ctx);
+            if (Double.isNaN(y) || y - 0.005 > theBall.y) {
+                System.out.println();
+                continue;
+            }
+
+            var adjustedY = GoldenSectionSearch.computeBallYOnCurve(graph.fn, ctx, theBall.x);
+            if (nextY < adjustedY) {
+                nextY = adjustedY;
+                theBall.lastCollisionTimestamp = time;
+            }
+        }
+        theBall.y = nextY;
+    }
+
+    private double computeGravity(double time) {
+        return Math.max(0.1, Math.min(0.5, time - theBall.lastCollisionTimestamp)) * GRAVITY;
+    }
+}
