@@ -33,9 +33,9 @@ import rollingball.expressions.Expressions.Expr;
 import rollingball.gamestate.GraphStorage;
 
 public final class GameRenderer {
-    private static final int GRAPH_AREA_WIDTH = 8; // -8..8 in both axes
-    private static final int GRAPH_AREA_HEIGHT = 8; // -8..8 in both axes
-
+    private static final int GRAPH_AREA_WIDTH = 8; // -8..8
+    private static final int GRAPH_AREA_HEIGHT = 8; // -8..8
+    
     private static final double PX_PER_GRAPH_AREA_UNIT = 50.0;
     private static final double GRAPH_AREA_WIDTH_PX = GRAPH_AREA_WIDTH * PX_PER_GRAPH_AREA_UNIT;
     private static final double GRAPH_AREA_HEIGHT_PX = GRAPH_AREA_HEIGHT * PX_PER_GRAPH_AREA_UNIT;
@@ -100,7 +100,6 @@ public final class GameRenderer {
         for (int i = -GRAPH_AREA_WIDTH; i <= GRAPH_AREA_WIDTH; ++i) {
             var x = i * PX_PER_GRAPH_AREA_UNIT;
             graphics.strokeLine(-GRAPH_AREA_WIDTH_PX, x, GRAPH_AREA_WIDTH_PX, x);
-
         }
 
         // Vertical lines
