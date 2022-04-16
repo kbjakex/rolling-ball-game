@@ -1,12 +1,12 @@
-package rollingball.expressions;
+package rollingball.functions;
 
 import java.util.function.Supplier;
 
-import rollingball.expressions.FunctionParser.ParserException;
-import rollingball.expressions.Expressions.Expr;
+import rollingball.functions.Function.Expr;
+import rollingball.functions.FunctionParser.ParserException;
 
-public final class Functions {
-    private Functions() {
+public final class BuiltinFunctions {
+    private BuiltinFunctions() {
     } // Make non-instantiable
 
     public static Expr parseFunctionCall(String name, Expr firstParam, Supplier<Expr> paramSupplier) {

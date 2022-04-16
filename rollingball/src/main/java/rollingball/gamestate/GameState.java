@@ -2,9 +2,9 @@ package rollingball.gamestate;
 
 import java.util.List;
 
-import rollingball.expressions.Expressions.Expr;
-import rollingball.expressions.Expressions.EvalContext;
-import rollingball.gamestate.GraphStorage.Graph;
+import rollingball.functions.EvalContext;
+import rollingball.functions.Function;
+import rollingball.gamestate.FunctionStorage.Graph;
 
 public final class GameState {
     public static final class Ball {
@@ -35,7 +35,7 @@ public final class GameState {
     private static final double BALL_SPEED = 1.5; // grid units per second
     private static final double GRAVITY = 0.67; // acceleration; grid units per second^2
 
-    private final GraphStorage graphs;
+    private final FunctionStorage graphs;
 
     private Level level;
 
@@ -45,7 +45,7 @@ public final class GameState {
     private Ball theBall;
 
     public GameState(Level level) {
-        this.graphs = new GraphStorage();
+        this.graphs = new FunctionStorage();
         this.startTimeMs = 0.0;
         this.isPlaying = false;
         this.level = level;
@@ -75,7 +75,7 @@ public final class GameState {
         return this.level;
     }
 
-    public Graph addGraph(Expr fn) {
+    public Graph addGraph(Function fn) {
         return graphs.addGraph(fn);
     }
 
@@ -101,9 +101,9 @@ public final class GameState {
 
         var nextY = theBall.y - computeGravity(time);
         for (var graph : getGraphs()) {
-            ctx.varX = theBall.x;
+            ctx.x = theBall.x;
             var y = graph.fn.eval(ctx);
-            if (Double.isNaN(y) || y - 0.005 > theBall.y) {
+            if (Double.isNaN(y) || y - 0.005 > theBall.y || !graph.fn.canEval(ctx)) {
                 System.out.println();
                 continue;
             }

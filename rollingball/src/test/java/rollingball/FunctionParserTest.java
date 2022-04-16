@@ -6,9 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import org.junit.jupiter.api.Test;
 
-import rollingball.expressions.FunctionParser;
-import rollingball.expressions.FunctionParser.ParserException;
-import rollingball.expressions.Expressions.EvalContext;
+import rollingball.functions.EvalContext;
+import rollingball.functions.FunctionParser;
+import rollingball.functions.FunctionParser.ParserException;
 
 public class FunctionParserTest {
     // doubles aren't exact, but on top of that, the double parser is definitely not exact, so use an epsilon 
@@ -115,12 +115,8 @@ public class FunctionParserTest {
     public void testRuntimeVariablesWork() {
         EvalContext ctx = new EvalContext(1.0); // t = 1.0
         assertEquals(1.0, FunctionParser.parse("t").eval(ctx));
-
-        ctx.varX = 10.0;
-        assertEquals(10.0, FunctionParser.parse("x").eval(ctx));
-
-        ctx.varX = -2.0;
-        assertEquals(-1.0, FunctionParser.parse("x + t").eval(ctx), EPSILON);
+        assertEquals(10.0, FunctionParser.parse("x").evalAt(10.0, ctx));
+        assertEquals(-1.0, FunctionParser.parse("x + t").evalAt(-2.0, ctx), EPSILON);
     }
 
     @Test
@@ -131,8 +127,8 @@ public class FunctionParserTest {
     @Test
     public void testMultiplicationSignCanBeOmittedBeforeIdentifier() {
         EvalContext ctx = new EvalContext(2.0);
-        ctx.varX = 3*Math.PI/2;
-        assertEquals(2*ctx.varX, FunctionParser.parse("2x").eval(ctx), EPSILON);
+        ctx.x = 3*Math.PI/2;
+        assertEquals(2*ctx.x, FunctionParser.parse("2x").eval(ctx), EPSILON);
         assertEquals(-3.0, FunctionParser.parse("-3sin(3x)").eval(ctx), EPSILON);
         assertEquals(12*Math.PI, FunctionParser.parse("(5+3)x").eval(ctx), EPSILON);
     }

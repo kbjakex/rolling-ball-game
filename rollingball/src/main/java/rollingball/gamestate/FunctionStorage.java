@@ -6,16 +6,16 @@ import java.util.List;
 
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
-import rollingball.expressions.Expressions.Expr;
+import rollingball.functions.Function;
 
-public final class GraphStorage {
+public final class FunctionStorage {
     public static final class Graph {
-        public final Expr fn;
+        public final Function fn;
         public final Paint color;
 
         private final int id;
 
-        public Graph(int id, Expr fn, Paint color) {
+        public Graph(int id, Function fn, Paint color) {
             this.id = id;
             this.fn = fn;
             this.color = color;
@@ -35,12 +35,12 @@ public final class GraphStorage {
     private final List<Integer> recycledIds;
     private int graphId = 0;
 
-    public GraphStorage() {
+    public FunctionStorage() {
         this.graphs = new ArrayList<>();
         this.recycledIds = new ArrayList<>();
     }
 
-    public Graph addGraph(Expr expr) {
+    public Graph addGraph(Function expr) {
         var id = computeNewGraphId();
         var color = computeColorFor(id);
         var graph = new Graph(id, expr, color);

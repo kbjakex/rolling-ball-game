@@ -1,7 +1,7 @@
 package rollingball.gamestate;
 
-import rollingball.expressions.Expressions.EvalContext;
-import rollingball.expressions.Expressions.Expr;
+import rollingball.functions.EvalContext;
+import rollingball.functions.Function;
 
 /*
 Problem: For the ball to roll on *top* of the curves, simply computing its y (upwards) position as
@@ -50,7 +50,7 @@ public final class GoldenSectionSearch {
      * @param ballX the ball's x position.
      * @return the ball's minimum Y position.
      */
-    public static double computeBallYOnCurve(Expr f, EvalContext ctx, double ballX) {
+    public static double computeBallYOnCurve(Function f, EvalContext ctx, double ballX) {
         var h = BALL_DIAMETER;
         var a = ballX - BALL_RADIUS;
         var b = ballX + BALL_RADIUS;
@@ -84,13 +84,12 @@ public final class GoldenSectionSearch {
         // The algorithm obviously gives an interval rather than a single point. With a
         // low-enough
         // tolerance, the midpoint of the interval should be a very good approximation.
-        ctx.varX = (yc < yd) ? (a + d) / 2.0 : (c + b) / 2.0;
-        return -evalAt(ctx.varX, f, ctx, ballX);
+        ctx.x = (yc < yd) ? (a + d) / 2.0 : (c + b) / 2.0;
+        return -evalAt(ctx.x, f, ctx, ballX);
     }
 
-    private static double evalAt(double x, Expr fn, EvalContext ctx, double ballX) {
-        ctx.varX = x;
-        return ballCurve(x - ballX) - fn.eval(ctx);
+    private static double evalAt(double x, Function fn, EvalContext ctx, double ballX) {
+        return ballCurve(x - ballX) - fn.evalAt(x, ctx);
     }
 
     private static double ballCurve(double x) {

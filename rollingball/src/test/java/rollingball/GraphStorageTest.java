@@ -10,18 +10,18 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import javafx.scene.paint.Color;
-import rollingball.expressions.Expressions.Expr;
-import rollingball.gamestate.GraphStorage;
+import rollingball.functions.Function;
+import rollingball.gamestate.FunctionStorage;
 
 public class GraphStorageTest {
-    private static final Expr DUMMY_EXPR = ctx -> 0.0;
-    private static final GraphStorage.Graph DUMMY_GRAPH = new GraphStorage.Graph(0, DUMMY_EXPR, Color.WHITE);
+    private static final Function DUMMY_EXPR = new Function(ctx -> 0.0, ctx -> true);
+    private static final FunctionStorage.Graph DUMMY_GRAPH = new FunctionStorage.Graph(0, DUMMY_EXPR, Color.WHITE);
 
-    GraphStorage graphs;
+    FunctionStorage graphs;
     
     @BeforeEach
     public void init() {
-        graphs = new GraphStorage();
+        graphs = new FunctionStorage();
     }
 
     @Test
@@ -59,20 +59,20 @@ public class GraphStorageTest {
 
     @Test
     public void testGraphEqualsDoesTypeChecking() {
-        var graph = new GraphStorage.Graph(0, DUMMY_EXPR, Color.WHITE);
+        var graph = new FunctionStorage.Graph(0, DUMMY_EXPR, Color.WHITE);
         assertEquals(false, graph.equals(new Object()));
     }
 
     @Test
     public void testGraphEqualsDoesNullChecking() {
-        var graph = new GraphStorage.Graph(0, DUMMY_EXPR, Color.WHITE);
+        var graph = new FunctionStorage.Graph(0, DUMMY_EXPR, Color.WHITE);
         assertEquals(false, graph.equals(null));
     }
 
     @Test
     public void testGraphEqualsDistinguishesGraphs() {
-        var graph1 = new GraphStorage.Graph(0, DUMMY_EXPR, Color.WHITE);
-        var graph2 = new GraphStorage.Graph(1, DUMMY_EXPR, Color.WHITE);
+        var graph1 = new FunctionStorage.Graph(0, DUMMY_EXPR, Color.WHITE);
+        var graph2 = new FunctionStorage.Graph(1, DUMMY_EXPR, Color.WHITE);
         assertNotEquals(graph1, graph2);
         assertEquals(graph1, graph1);
         assertEquals(graph2, graph2);

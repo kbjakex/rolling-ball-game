@@ -27,10 +27,10 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import rollingball.expressions.FunctionParser;
-import rollingball.expressions.Expressions;
-import rollingball.expressions.FunctionParser.ParserException;
-import rollingball.expressions.Expressions.Expr;
+import rollingball.functions.EvalContext;
+import rollingball.functions.Function;
+import rollingball.functions.FunctionParser;
+import rollingball.functions.FunctionParser.ParserException;
 import rollingball.gamestate.GameState;
 import rollingball.gamestate.GoldenSectionSearch;
 import rollingball.gamestate.Level;
@@ -69,7 +69,7 @@ public final class GameRenderer {
     }
 
     private void drawGraphs() {
-        var evalCtx = new Expressions.EvalContext(state.getPlayingTimeMs() / 1000.0);
+        var evalCtx = new EvalContext(state.getPlayingTimeMs() / 1000.0);
         var xStepSize = 2.0 / PX_PER_GRAPH_AREA_UNIT;
 
         graphics.setStroke(Color.BLACK);
@@ -78,7 +78,7 @@ public final class GameRenderer {
             graphics.setStroke(graph.color);
             graphics.beginPath();
 
-            evalCtx.varX = -GRAPH_AREA_WIDTH;
+            evalCtx.x = -GRAPH_AREA_WIDTH;
             graphics.moveTo(-GRAPH_AREA_WIDTH_PX, -PX_PER_GRAPH_AREA_UNIT * graph.fn.eval(evalCtx));
 
             var renderX = -GRAPH_AREA_WIDTH_PX + 2;
@@ -86,7 +86,7 @@ public final class GameRenderer {
                 var y = graph.fn.eval(evalCtx) * -PX_PER_GRAPH_AREA_UNIT; // up is negative in screen coords
                 graphics.lineTo(renderX, y);
 
-                evalCtx.varX += xStepSize;
+                evalCtx.x += xStepSize;
                 renderX += 2;
             }
             graphics.stroke();
@@ -243,7 +243,7 @@ public final class GameRenderer {
         equationList.getItems().add(equationListEntry);
     }
 
-    private static Expr readExpression(String expressionString) {
+    private static Function readExpression(String expressionString) {
         if (expressionString.isEmpty()) {
             return null;
         }

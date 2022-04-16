@@ -1,12 +1,12 @@
-package rollingball.expressions;
+package rollingball.functions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
 
-import rollingball.expressions.Expressions.Expr;
-import rollingball.expressions.Expressions.ArithmeticOp;
+import rollingball.functions.Function.Expr;
+import rollingball.functions.Operators.ArithmeticOp;
 
 public final class FunctionParser {
     public static final class ParserException extends RuntimeException {
@@ -67,7 +67,7 @@ public final class FunctionParser {
             return parseExpr();
         };
 
-        var result = Functions.parseFunctionCall(name, firstParam, paramSupplier);
+        var result = BuiltinFunctions.parseFunctionCall(name, firstParam, paramSupplier);
         expect(')', "Missing closing ')'");
         return result;
     }
@@ -79,8 +79,8 @@ public final class FunctionParser {
         }
 
         return switch (name) {
-            case "x" -> ctx -> ctx.varX;
-            case "t" -> ctx -> ctx.varT;
+            case "x" -> ctx -> ctx.x;
+            case "t" -> ctx -> ctx.t;
             case "pi", "PI" -> Expr.constant(Math.PI);
             case "e", "E" -> Expr.constant(Math.E);
             default ->
@@ -216,24 +216,20 @@ public final class FunctionParser {
         return srcPos < src.length;
     }
 
-    public Expr parse() {
-        return parseExpr();
-    }
-
-    public static Expr parse(String expression) {
+    public static Function parse(String expression) {
         var dense = removeWhitespace(expression);
         if (dense.length == 0) {
             return null;
         }
 
         var parser = new FunctionParser(dense);
-        var result = parser.parse();
+        var formula = parser.parseExpr();
         if (parser.srcPos != dense.length) {
             throw new ParserException("Trailing content: '%s'",
                     new String(dense, parser.srcPos, dense.length - parser.srcPos));
         }
 
-        return result;
+        return new Function(formula, ctx -> true);
     }
 
     public static char[] removeWhitespace(String expr) {
