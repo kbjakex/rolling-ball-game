@@ -27,9 +27,9 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import rollingball.expressions.ExpressionParser;
+import rollingball.expressions.FunctionParser;
 import rollingball.expressions.Expressions;
-import rollingball.expressions.ExpressionParser.ParserException;
+import rollingball.expressions.FunctionParser.ParserException;
 import rollingball.expressions.Expressions.Expr;
 import rollingball.gamestate.GameState;
 import rollingball.gamestate.GoldenSectionSearch;
@@ -79,11 +79,11 @@ public final class GameRenderer {
             graphics.beginPath();
 
             evalCtx.varX = -GRAPH_AREA_WIDTH;
-            graphics.moveTo(-GRAPH_AREA_WIDTH_PX, -PX_PER_GRAPH_AREA_UNIT * graph.fn.evaluate(evalCtx));
+            graphics.moveTo(-GRAPH_AREA_WIDTH_PX, -PX_PER_GRAPH_AREA_UNIT * graph.fn.eval(evalCtx));
 
             var renderX = -GRAPH_AREA_WIDTH_PX + 2;
             for (int i = 2; i <= GRAPH_AREA_WIDTH_PX; ++i) {
-                var y = graph.fn.evaluate(evalCtx) * -PX_PER_GRAPH_AREA_UNIT; // up is negative in screen coords
+                var y = graph.fn.eval(evalCtx) * -PX_PER_GRAPH_AREA_UNIT; // up is negative in screen coords
                 graphics.lineTo(renderX, y);
 
                 evalCtx.varX += xStepSize;
@@ -249,7 +249,7 @@ public final class GameRenderer {
         }
 
         try {
-            return ExpressionParser.parse(expressionString);
+            return FunctionParser.parse(expressionString);
         } catch (ParserException ex) {
             var errorAlert = new Alert(AlertType.ERROR);
             errorAlert.setHeaderText("Input not valid");

@@ -102,7 +102,7 @@ public final class GameState {
         var nextY = theBall.y - computeGravity(time);
         for (var graph : getGraphs()) {
             ctx.varX = theBall.x;
-            var y = graph.fn.evaluate(ctx);
+            var y = graph.fn.eval(ctx);
             if (Double.isNaN(y) || y - 0.005 > theBall.y) {
                 System.out.println();
                 continue;

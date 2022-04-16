@@ -90,7 +90,7 @@ public final class GoldenSectionSearch {
 
     private static double evalAt(double x, Expr fn, EvalContext ctx, double ballX) {
         ctx.varX = x;
-        return ballCurve(x - ballX) - fn.evaluate(ctx);
+        return ballCurve(x - ballX) - fn.eval(ctx);
     }
 
     private static double ballCurve(double x) {

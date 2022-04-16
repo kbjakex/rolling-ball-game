@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import rollingball.expressions.Expressions.Expr;
-import rollingball.expressions.Expressions.Op;
+import rollingball.expressions.Expressions.ArithmeticOp;
 
-public final class ExpressionParser {
+public final class FunctionParser {
     public static final class ParserException extends RuntimeException {
         public ParserException(String message) {
             super(message);
@@ -22,7 +22,7 @@ public final class ExpressionParser {
     private final char[] src;
     private int srcPos;
 
-    private ExpressionParser(char[] src) {
+    private FunctionParser(char[] src) {
         this.src = src;
     }
 
@@ -107,13 +107,13 @@ public final class ExpressionParser {
         var result = parseOperandInner();
 
         if (negate) {
-            return ctx -> -result.evaluate(ctx);
+            return ctx -> -result.eval(ctx);
         } else {
             return result;
         }
     }
 
-    private Op tryParseOperator() {
+    private ArithmeticOp tryParseOperator() {
         if (!hasNext()) {
             return null;
         }
@@ -121,14 +121,14 @@ public final class ExpressionParser {
         // Implicit multiplication sign before identifiers, e.g. `5x`, `3sin(x)`, `3x^2`
         // etc.
         if (Character.isAlphabetic(src[srcPos])) {
-            return Op.MUL;
+            return ArithmeticOp.MUL;
         }
 
         return switch (src[srcPos++]) {
-            case '+' -> Op.ADD;
-            case '-' -> Op.SUB;
-            case '*' -> Op.MUL;
-            case '/' -> Op.DIV;
+            case '+' -> ArithmeticOp.ADD;
+            case '-' -> ArithmeticOp.SUB;
+            case '*' -> ArithmeticOp.MUL;
+            case '/' -> ArithmeticOp.DIV;
             default -> {
                 srcPos--;
                 yield null;
@@ -136,15 +136,15 @@ public final class ExpressionParser {
         };
     }
 
-    private Expr parseComplexExpr(Expr firstOperand, Op firstOp) {
-        var operatorStack = new ArrayList<Op>();
+    private Expr parseComplexExpr(Expr firstOperand, ArithmeticOp firstOp) {
+        var operatorStack = new ArrayList<ArithmeticOp>();
         operatorStack.add(firstOp);
 
         var operandStack = new ArrayList<Expr>();
         operandStack.add(firstOperand);
         operandStack.add(parseOperand());
 
-        Op op;
+        ArithmeticOp op;
         while ((op = tryParseOperator()) != null) {
             var operand = parseOperand();
 
@@ -174,7 +174,7 @@ public final class ExpressionParser {
         return root;
     }
 
-    private void mergeTopOfStack(List<Expr> operandStack, List<Op> operatorStack) {
+    private void mergeTopOfStack(List<Expr> operandStack, List<ArithmeticOp> operatorStack) {
         var mergedOp = operatorStack.remove(operatorStack.size() - 1);
         var rhs = operandStack.remove(operandStack.size() - 1);
         var lhs = operandStack.remove(operandStack.size() - 1);
@@ -185,10 +185,10 @@ public final class ExpressionParser {
             operandStack.add(Expr.constant(mergedOp.apply(lhsConstEval, rhsConstEval)));
         } else {
             Expr expr = switch (mergedOp) {
-                case ADD -> ctx -> lhs.evaluate(ctx) + rhs.evaluate(ctx);
-                case SUB -> ctx -> lhs.evaluate(ctx) - rhs.evaluate(ctx);
-                case MUL -> ctx -> lhs.evaluate(ctx) * rhs.evaluate(ctx);
-                case DIV -> ctx -> lhs.evaluate(ctx) / rhs.evaluate(ctx);
+                case ADD -> ctx -> lhs.eval(ctx) + rhs.eval(ctx);
+                case SUB -> ctx -> lhs.eval(ctx) - rhs.eval(ctx);
+                case MUL -> ctx -> lhs.eval(ctx) * rhs.eval(ctx);
+                case DIV -> ctx -> lhs.eval(ctx) / rhs.eval(ctx);
             };
             operandStack.add(expr);
         }
@@ -226,7 +226,7 @@ public final class ExpressionParser {
             return null;
         }
 
-        var parser = new ExpressionParser(dense);
+        var parser = new FunctionParser(dense);
         var result = parser.parse();
         if (parser.srcPos != dense.length) {
             throw new ParserException("Trailing content: '%s'",
