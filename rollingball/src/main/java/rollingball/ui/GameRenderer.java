@@ -35,7 +35,7 @@ import rollingball.gamestate.GraphStorage;
 public final class GameRenderer {
     private static final int GRAPH_AREA_WIDTH = 8; // -8..8
     private static final int GRAPH_AREA_HEIGHT = 8; // -8..8
-    
+
     private static final double PX_PER_GRAPH_AREA_UNIT = 50.0;
     private static final double GRAPH_AREA_WIDTH_PX = GRAPH_AREA_WIDTH * PX_PER_GRAPH_AREA_UNIT;
     private static final double GRAPH_AREA_HEIGHT_PX = GRAPH_AREA_HEIGHT * PX_PER_GRAPH_AREA_UNIT;
@@ -81,7 +81,6 @@ public final class GameRenderer {
 
             var renderX = -GRAPH_AREA_WIDTH_PX+2;
             for (int i = 2; i <= GRAPH_AREA_WIDTH_PX; ++i) {
-                evalCtx.varX = i / GRAPH_AREA_WIDTH_PX * GRAPH_AREA_WIDTH;
                 var y = graph.fn.evaluate(evalCtx) * -PX_PER_GRAPH_AREA_UNIT; // up is negative in screen coords
                 graphics.lineTo(renderX, y);
 
@@ -89,6 +88,14 @@ public final class GameRenderer {
                 renderX += 2;
             }
             graphics.stroke();
+
+/*             var bx = (Math.sin(frameCount*0.01)*300) * GRAPH_AREA_WIDTH / GRAPH_AREA_WIDTH_PX;
+            var bx2 = GoldenSectionSearch.computeBallYOnCurve(graph.fn, evalCtx, bx);
+            var y = -bx2.y() * -PX_PER_GRAPH_AREA_UNIT;
+            var r = GoldenSectionSearch.BALL_RADIUS * PX_PER_GRAPH_AREA_UNIT;
+            graphics.setFill(graph.color);
+            graphics.fillOval(bx * PX_PER_GRAPH_AREA_UNIT - r, y - 2.0 * r, r * 2, r * 2);
+            graphics.setFill(Color.ORANGE); */
         }
     }
 

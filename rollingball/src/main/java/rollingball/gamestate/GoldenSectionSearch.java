@@ -29,7 +29,7 @@ public final class GoldenSectionSearch {
     }
 
     // (should this be here?)
-    public static final double BALL_RADIUS = 10.0;
+    public static final double BALL_RADIUS = 0.4;
 
     private static final double INV_PHI = (Math.sqrt(5.0) - 1.0) / 2.0; // 1 / phi
 
@@ -41,7 +41,7 @@ public final class GoldenSectionSearch {
 
     // Number of steps required to achieve desired tolerance
     private static final int NUM_ITERATIONS = (int) (Math
-            .ceil(Math.log(TOLERANCE / BALL_DIAMETER) / Math.log(INV_PHI)));
+            .ceil(Math.log(TOLERANCE / (BALL_DIAMETER)) / Math.log(INV_PHI))) - 1;
 
     /**
      * Computes the Y position that the ball must be placed on in order not to clip
@@ -60,12 +60,10 @@ public final class GoldenSectionSearch {
         var c = a + INV_PHI_E2 * h;
         var d = a + INV_PHI * h;
 
-        ctx.varX = c;
-        var yc = f.evaluate(ctx);
-        ctx.varX = d;
-        var yd = f.evaluate(ctx);
+        var yc = evalAt(c, f, ctx, ballX);
+        var yd = evalAt(d, f, ctx, ballX);
 
-        for (var k = 0; k < NUM_ITERATIONS - 1; k++) {
+        for (var k = 0; k < NUM_ITERATIONS; k++) {
             if (yc < yd) {
                 b = d;
                 d = c;
@@ -73,8 +71,7 @@ public final class GoldenSectionSearch {
                 h = INV_PHI * h;
                 c = a + INV_PHI_E2 * h;
 
-                ctx.varX = c;
-                yc = f.evaluate(ctx);
+                yc = evalAt(c, f, ctx, ballX);
             } else {
                 a = c;
                 c = d;
@@ -82,8 +79,7 @@ public final class GoldenSectionSearch {
                 h = INV_PHI * h;
                 d = a + INV_PHI * h;
 
-                ctx.varX = d;
-                yd = f.evaluate(ctx);
+                yd = evalAt(d, f, ctx, ballX);
             }
         }
 
@@ -91,6 +87,15 @@ public final class GoldenSectionSearch {
         // low-enough
         // tolerance, the midpoint of the interval should be a very good approximation.
         ctx.varX = (yc < yd) ? (a + d) / 2.0 : (c + b) / 2.0;
-        return f.evaluate(ctx) + BALL_RADIUS;
+        return evalAt(ctx.varX, f, ctx, ballX);
+    }
+
+    private static double evalAt(double x, Expr fn, EvalContext ctx, double ballX) {
+        ctx.varX = x;
+        return ballCurve(ballX - x) - fn.evaluate(ctx);
+    }
+
+    private static double ballCurve(double x) {
+        return BALL_RADIUS - Math.sqrt(BALL_RADIUS * BALL_RADIUS - x * x);
     }
 }
