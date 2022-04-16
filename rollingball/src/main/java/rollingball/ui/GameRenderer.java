@@ -30,7 +30,7 @@ import rollingball.expressions.ExpressionParser;
 import rollingball.expressions.Expressions;
 import rollingball.expressions.ExpressionParser.ParserException;
 import rollingball.expressions.Expressions.Expr;
-import rollingball.gamestate.GraphStorage;
+import rollingball.gamestate.GameState;
 
 public final class GameRenderer {
     private static final int GRAPH_AREA_WIDTH = 8; // -8..8
@@ -43,13 +43,13 @@ public final class GameRenderer {
     private final Canvas canvas;
     private final GraphicsContext graphics;
 
-    private final GraphStorage graphs;
+    private final GameState state;
 
     private int frameCount;
 
-    private GameRenderer(Canvas canvas, GraphStorage graphs) {
+    private GameRenderer(Canvas canvas, GameState state) {
         this.canvas = canvas;
-        this.graphs = graphs;
+        this.state = state;
         this.graphics = canvas.getGraphicsContext2D();
     }
 
@@ -72,7 +72,7 @@ public final class GameRenderer {
 
         graphics.setStroke(Color.BLACK);
         graphics.setLineWidth(2.0);
-        for (var graph : graphs.getGraphs()) {
+        for (var graph : state.getGraphs()) {
             graphics.setStroke(graph.color);
             graphics.beginPath();
 
@@ -88,14 +88,6 @@ public final class GameRenderer {
                 renderX += 2;
             }
             graphics.stroke();
-
-/*             var bx = (Math.sin(frameCount*0.01)*300) * GRAPH_AREA_WIDTH / GRAPH_AREA_WIDTH_PX;
-            var bx2 = GoldenSectionSearch.computeBallYOnCurve(graph.fn, evalCtx, bx);
-            var y = -bx2.y() * -PX_PER_GRAPH_AREA_UNIT;
-            var r = GoldenSectionSearch.BALL_RADIUS * PX_PER_GRAPH_AREA_UNIT;
-            graphics.setFill(graph.color);
-            graphics.fillOval(bx * PX_PER_GRAPH_AREA_UNIT - r, y - 2.0 * r, r * 2, r * 2);
-            graphics.setFill(Color.ORANGE); */
         }
     }
 
@@ -123,7 +115,7 @@ public final class GameRenderer {
     }
 
     public static Scene createGameScene(Stage primaryStage, Stack<Scene> sceneHistory) {
-        var graphs = new GraphStorage();
+        var state = new GameState();
 
         var desiredWidth = 800;Math.max(primaryStage.getWidth(), 2*GRAPH_AREA_WIDTH_PX);
         var desiredHeight = 800;Math.max(primaryStage.getHeight(), 2*GRAPH_AREA_HEIGHT_PX+60);
@@ -150,7 +142,7 @@ public final class GameRenderer {
             }
         });
 
-        addEquationButton.setOnAction(e -> addExpression(equationInput, equationList, graphs));
+        addEquationButton.setOnAction(e -> addExpression(equationInput, equationList, state));
         
         var equationControls = new HBox(equationInput, addEquationButton);
         equationControls.setPadding(new Insets(10.0));
@@ -175,7 +167,7 @@ public final class GameRenderer {
         var root = new VBox(topUi, split);
         var scene = new Scene(root, desiredWidth, desiredHeight);
 
-        var game = new GameRenderer(canvas, graphs);
+        var game = new GameRenderer(canvas, state);
 
         var timeline = new Timeline();
         timeline.getKeyFrames().add(new KeyFrame(Duration.millis(1000.0 / 60.0), game::onFrame));
@@ -185,7 +177,7 @@ public final class GameRenderer {
         return scene;
     }
 
-    private static void addExpression(TextField equationInput, ListView<HBox> equationList, GraphStorage graphs) {
+    private static void addExpression(TextField equationInput, ListView<HBox> equationList, GameState state) {
         var exprAsString = equationInput.getText();
         var expr = readExpression(exprAsString);
         if (expr == null) {
@@ -194,7 +186,7 @@ public final class GameRenderer {
         
         equationInput.clear();
 
-        var graph = graphs.addGraph(expr);
+        var graph = state.addGraph(expr);
 
         var equationLabel = new Label(exprAsString);
         equationLabel.setFont(new Font("Arial", 18));
@@ -205,7 +197,7 @@ public final class GameRenderer {
         var equationListEntry = new HBox();
         var removeEquationButton = new Button("Remove");
         removeEquationButton.setOnAction(ee -> {
-            graphs.removeGraph(graph);
+            state.removeGraph(graph);
             equationList.getItems().remove(equationListEntry);
         });
 
