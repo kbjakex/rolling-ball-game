@@ -30,10 +30,11 @@ import javafx.util.Duration;
 import rollingball.functions.EvalContext;
 import rollingball.functions.Function;
 import rollingball.functions.FunctionParser;
-import rollingball.functions.FunctionParser.ParserException;
+import rollingball.functions.ParserException;
 import rollingball.gamestate.GameState;
 import rollingball.gamestate.GoldenSectionSearch;
 import rollingball.gamestate.Level;
+import rollingball.gamestate.FunctionStorage.Graph;
 
 public final class GameRenderer {
     private static final int GRAPH_AREA_WIDTH = 8; // -8..8
@@ -64,34 +65,12 @@ public final class GameRenderer {
 
         drawGrid();
         drawGraphs();
+        drawBall();
 
         graphics.translate(-canvasWidth / 2, -canvasHeight / 2);
     }
 
-    private void drawGraphs() {
-        var evalCtx = new EvalContext(state.getPlayingTimeMs() / 1000.0);
-        var xStepSize = 2.0 / PX_PER_GRAPH_AREA_UNIT;
-
-        graphics.setStroke(Color.BLACK);
-        graphics.setLineWidth(2.0);
-        for (var graph : state.getGraphs()) {
-            graphics.setStroke(graph.color);
-            graphics.beginPath();
-
-            evalCtx.x = -GRAPH_AREA_WIDTH;
-            graphics.moveTo(-GRAPH_AREA_WIDTH_PX, -PX_PER_GRAPH_AREA_UNIT * graph.fn.eval(evalCtx));
-
-            var renderX = -GRAPH_AREA_WIDTH_PX + 2;
-            for (int i = 2; i <= GRAPH_AREA_WIDTH_PX; ++i) {
-                var y = graph.fn.eval(evalCtx) * -PX_PER_GRAPH_AREA_UNIT; // up is negative in screen coords
-                graphics.lineTo(renderX, y);
-
-                evalCtx.x += xStepSize;
-                renderX += 2;
-            }
-            graphics.stroke();
-        }
-
+    private void drawBall() {
         graphics.setStroke(Color.BLACK);
         graphics.setFill(Color.GRAY);
         var ball = state.getBall();
@@ -100,6 +79,47 @@ public final class GameRenderer {
                 ball.getX() * PX_PER_GRAPH_AREA_UNIT - diameter / 2.0,
                 -ball.getY() * PX_PER_GRAPH_AREA_UNIT - diameter,
                 diameter, diameter);
+    }
+
+    private void drawGraphs() {
+        var evalCtx = new EvalContext(state.getPlayingTimeMs() / 1000.0);
+
+        graphics.setLineWidth(2.0);
+        for (var graph : state.getGraphs()) {
+            renderGraph(graph, evalCtx);
+        }
+    }
+
+    private void renderGraph(Graph graph, EvalContext ctx) {
+        graphics.setStroke(graph.color);
+        graphics.beginPath();
+
+        // TODO: here's a *really* sweet opportunity to cut down on the amount of work to do
+        // by approximating the second derivative and adjusting stepSize such that straight
+        // lines need much less vertices
+        var stepSize = 2.0;
+
+        for (var pixelX = -GRAPH_AREA_WIDTH_PX; pixelX <= GRAPH_AREA_WIDTH_PX; pixelX += stepSize) {
+            ctx.x = pixelX / PX_PER_GRAPH_AREA_UNIT;
+            
+            if (!graph.fn.canEval(ctx)) {
+                continue;
+            }
+
+            // up is negative in screen coords so negate the value
+            graphics.moveTo(pixelX, -graph.fn.eval(ctx) * PX_PER_GRAPH_AREA_UNIT);
+            pixelX += stepSize;
+            ctx.x += stepSize / PX_PER_GRAPH_AREA_UNIT;
+
+            while (graph.fn.canEval(ctx) && pixelX <= GRAPH_AREA_WIDTH_PX) {
+                graphics.lineTo(pixelX, -graph.fn.eval(ctx) * PX_PER_GRAPH_AREA_UNIT);
+
+                pixelX += stepSize;
+                ctx.x += stepSize / PX_PER_GRAPH_AREA_UNIT;
+            }
+        }
+
+        graphics.stroke();
     }
 
     private void drawGrid() {
@@ -147,18 +167,38 @@ public final class GameRenderer {
         var addEquationButton = new Button("+");
 
         var equationInput = new TextField();
+        equationInput.setPromptText("Enter an equation (ex: `1 + sin(x)`)");
         HBox.setHgrow(equationInput, Priority.ALWAYS);
-        HBox.setMargin(equationInput, new Insets(0, 10, 0, 0));
+
+        var conditionInput = new TextField();
+        conditionInput.setPrefWidth(200);
+        conditionInput.setPromptText("Condition (ex: `0 < x < 1`)");
+        //HBox.setHgrow(conditionInput, Priority.SOMETIMES);
+        HBox.setMargin(conditionInput, new Insets(0, 10, 0, 10));
+        
         // Make life easier by allowing enter instead of requiring user to click
         equationInput.setOnKeyPressed(keyEvent -> {
             if (keyEvent.getCode() == javafx.scene.input.KeyCode.ENTER) {
                 addEquationButton.fire();
             }
         });
+        conditionInput.setOnKeyPressed(keyEvent -> {
+            if (conditionInput.getText().isEmpty() || keyEvent.getCode() != javafx.scene.input.KeyCode.ENTER) {
+                return;
+            }
+            if (equationInput.getText().isEmpty()) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText("Equation field is empty!");
+                alert.showAndWait();
+                return;
+            }
+            addEquationButton.fire();
+        });
 
-        addEquationButton.setOnAction(e -> addExpression(equationInput, equationList, state));
+        addEquationButton.setOnAction(e -> addExpression(equationInput, conditionInput, equationList, state));
 
-        var equationControls = new HBox(equationInput, addEquationButton);
+        var equationControls = new HBox(equationInput, conditionInput, addEquationButton);
         equationControls.setPadding(new Insets(10.0));
         equationControls.setPrefWidth(Double.MAX_VALUE);
 
@@ -214,14 +254,16 @@ public final class GameRenderer {
         return scene;
     }
 
-    private static void addExpression(TextField equationInput, ListView<HBox> equationList, GameState state) {
+    private static void addExpression(TextField equationInput, TextField conditionInput, ListView<HBox> equationList, GameState state) {
         var exprAsString = equationInput.getText();
-        var expr = readExpression(exprAsString);
+        var condAsString = conditionInput.getText();
+        var expr = readExpression(exprAsString, condAsString);
         if (expr == null) {
             return;
         }
 
         equationInput.clear();
+        conditionInput.clear();
 
         var graph = state.addGraph(expr);
 
@@ -243,13 +285,13 @@ public final class GameRenderer {
         equationList.getItems().add(equationListEntry);
     }
 
-    private static Function readExpression(String expressionString) {
+    private static Function readExpression(String expressionString, String conditionString) {
         if (expressionString.isEmpty()) {
             return null;
         }
 
         try {
-            return FunctionParser.parse(expressionString);
+            return FunctionParser.parse(expressionString, conditionString);
         } catch (ParserException ex) {
             var errorAlert = new Alert(AlertType.ERROR);
             errorAlert.setHeaderText("Input not valid");

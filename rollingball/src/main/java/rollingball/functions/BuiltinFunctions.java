@@ -3,7 +3,6 @@ package rollingball.functions;
 import java.util.function.Supplier;
 
 import rollingball.functions.Function.Expr;
-import rollingball.functions.FunctionParser.ParserException;
 
 public final class BuiltinFunctions {
     private BuiltinFunctions() {
