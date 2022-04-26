@@ -6,6 +6,7 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 import rollingball.gamestate.Level;
 import rollingball.gamestate.Levels;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
@@ -67,13 +68,67 @@ public class RollingBall extends Application {
     }
 
     private Scene createLevelSelectScene(Stage primaryStage, Stack<Scene> sceneHistory) {
-        var pane = new Pane();
-        pane.getChildren().add(new Label("Not done"));
+        var layout = new VBox();
+        layout.setPrefSize(800, 800);
+        layout.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
+
+        var scene = new Scene(layout, 800, 800);
         
-        var scene = new Scene(pane, 800, 800);
-        sceneHistory.push(scene);
+        var backButton = new Button("Back");
+        backButton.setPrefSize(64, 48);
+        backButton.setFont(new Font("Arial", 14));
+        backButton.setBackground(new Background(new BackgroundFill(Color.WHITE, new CornerRadii(5.0), Insets.EMPTY)));
+        backButton.setBorder(new Border(new BorderStroke(Color.LIGHTGRAY, BorderStrokeStyle.SOLID, new CornerRadii(5.0), new BorderWidths(2.0))));
+        backButton.setOnAction(e -> primaryStage.setScene(sceneHistory.pop()));
+        HBox.setMargin(backButton, new Insets(10, 10, 10, 10));
+
+        var top = new HBox(createHSpacer(), backButton);
+        top.setPrefHeight(100);
+
+        var levels = new HBox();
+        levels.setPadding(new Insets(50, 50, 50, 50));
+        levels.setFocusTraversable(false);
+
+        for (var level : Levels.values()) {
+            var levelButton = new Button(level.name);
+            levelButton.setPrefSize(250, 250);
+            levelButton.setFont(new Font("Arial", 35));
+            HBox.setMargin(levelButton, new Insets(10, 50, 10, 0));
+
+            levelButton.setOnAction(e -> {
+                sceneHistory.add(scene);
+                primaryStage.setScene(GameRenderer.createGameScene(primaryStage, sceneHistory, level.createInstance()));
+            });
+
+            levels.getChildren().add(levelButton);
+        }
+        var levelView = new ScrollPane(levels);
+        levelView.setPrefHeight(400);
+        levelView.setBorder(Border.EMPTY);
+        levelView.setFocusTraversable(false);
+
+        var title = new Label("Level Select");
+        title.setFont(new Font("Arial", 32));
+        title.setTextFill(Color.BLACK);
+        title.setAlignment(Pos.CENTER);
+        HBox.setMargin(title, new Insets(10, 10, 10, 10));
+
+        layout.getChildren().addAll(top, new HBox(createHSpacer(), title, createHSpacer()), createVSpacer(), levelView, createVSpacer());
+        VBox.setMargin(levelView, new Insets(10, 10, 10, 10));
 
         return scene;
+    }
+
+    private Node createHSpacer() {
+        var spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        return spacer;
+    }
+
+    private Node createVSpacer() {
+        var spacer = new Region();
+        VBox.setVgrow(spacer, Priority.ALWAYS);
+        return spacer;
     }
 
     private Button createButton(String text, double size, double padding) {
