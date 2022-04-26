@@ -5,20 +5,23 @@ import java.util.Collections;
 import java.util.List;
 
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import rollingball.functions.Function;
 
 public final class FunctionStorage {
     public static final class Graph {
-        public final Function fn;
-        public final Paint color;
+        public Function fn;
+        public final Color color;
 
         private final int id;
 
-        public Graph(int id, Function fn, Paint color) {
+        public Graph(int id, Function fn, Color color) {
             this.id = id;
             this.fn = fn;
             this.color = color;
+        }
+
+        public void setFunction(Function fn) {
+            this.fn = fn;
         }
 
         @Override
@@ -56,7 +59,7 @@ public final class FunctionStorage {
         return graphId++;
     }
 
-    private Paint computeColorFor(int id) {
+    private Color computeColorFor(int id) {
         if (id < GRAPH_COLOR_RBG_TABLE.length) {
             var rgb = GRAPH_COLOR_RBG_TABLE[id];
             return Color.rgb(rgb & 0xFF, (rgb >> 8) & 0xFF, (rgb >> 16) & 0xFF);

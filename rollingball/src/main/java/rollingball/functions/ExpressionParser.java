@@ -158,7 +158,7 @@ public final class ExpressionParser extends ParserBase<Expr> {
         if (op != null) {
             return parseComplexExpr(root, op);
         }
-        
+
         return root;
     }
 

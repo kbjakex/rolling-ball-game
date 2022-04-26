@@ -9,6 +9,8 @@ public abstract class ParserBase<T> {
     protected abstract T doParse();
 
     public final ParseResult<T> parse(char[] src, int startIdx) {
+        if (src.length == 0) return new ParseResult<>(null, 0);
+
         this.src = src;
         this.srcPos = startIdx;
 

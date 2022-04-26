@@ -4,6 +4,7 @@ import java.util.Stack;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
+import rollingball.gamestate.Level;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
@@ -25,6 +26,8 @@ public class RollingBall extends Application {
     }
 
     private Scene createMainMenuScene(Stage primaryStage) {
+        primaryStage.setResizable(false);
+
         var mainMenu = new VBox();
         var scene = new Scene(mainMenu, 800, 800);
         
@@ -36,8 +39,9 @@ public class RollingBall extends Application {
         var startButton = createButton("Start", 30, 20);
         startButton.setOnAction(e -> {
             sceneStack.push(scene);
-            primaryStage.setScene(createGameScene(primaryStage, sceneStack));
+            primaryStage.setScene(GameRenderer.createGameScene(primaryStage, sceneStack, Level.LEVEL_1));
         });
+        startButton.requestFocus();
 
         var levelsButton = createButton("Level Select", 30, 20);
         levelsButton.setOnAction(e -> {
@@ -54,14 +58,11 @@ public class RollingBall extends Application {
             levelsButton,
             quitButton
         );
+
         mainMenu.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
         mainMenu.setAlignment(Pos.TOP_CENTER);
         
         return scene;
-    }
-
-    private Scene createGameScene(Stage primaryStage, Stack<Scene> sceneHistory) {
-        return GameRenderer.createGameScene(primaryStage, sceneHistory);
     }
 
     private Scene createLevelSelectScene(Stage primaryStage, Stack<Scene> sceneHistory) {
@@ -75,10 +76,24 @@ public class RollingBall extends Application {
     }
 
     private Button createButton(String text, double size, double padding) {
-        var label = new Button(text);
-        label.setFont(new Font("Arial", size));
-        label.setPadding(new Insets(padding));
-        return label;
+        var button = new Button(text);
+        button.setFont(new Font("Arial", size));
+        button.setPadding(new Insets(padding));
+        button.backgroundProperty().set(Background.EMPTY);
+
+        button.focusedProperty().addListener((obj, oldVal, newVal) -> {
+            button.setText(button.isFocused() ? "> " + text + " <" : text);
+        });
+
+        button.hoverProperty().addListener((obj, oldVal, newVal) -> {
+            button.setText(button.isHover() ? "> " + text + " <" : text);
+        });
+
+        button.pressedProperty().addListener((obj, oldVal, newVal) -> {
+            button.setText(button.isPressed() ? ">" + text + "<" : text);
+        });
+
+        return button;
     }
 
     private Label createLabel(String text, double size, double padding) {
