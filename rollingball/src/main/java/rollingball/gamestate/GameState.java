@@ -31,8 +31,8 @@ public final class GameState {
         }
 
         public void reset(Level level) {
-            this.x = level.startX;
-            this.y = level.startY;
+            this.x = level.start.x();
+            this.y = level.start.y();
             this.lastCollisionTimestamp = 0.0;
         }
     }
@@ -102,6 +102,8 @@ public final class GameState {
         if (this.isPlaying) {
             var timeSeconds = (System.nanoTime() / 1_000_000.0 - this.startTimeMs) / 1000.0;
             var deltaTime = timeSeconds - this.timeOnLastUpdate;
+            
+            this.level.onUpdate(timeSeconds, deltaTime);
 
             updateBallPos(timeSeconds, deltaTime);
             if (checkShouldDie()) {
@@ -122,7 +124,7 @@ public final class GameState {
             return true;
         }
 
-        for (var obstacle : level.obstacles) {
+        for (var obstacle : level.getObstacles()) {
             if (obstacle.checkWouldKill(theBall)) {
                 return true;
             }
@@ -131,8 +133,8 @@ public final class GameState {
     }
 
     private boolean checkIsTouchingFlag() {
-        var dx = theBall.x - level.endX;
-        var dy = theBall.y - level.endY;
+        var dx = theBall.x - level.end.x();
+        var dy = theBall.y - level.end.y();
         return dx*dx + dy*dy < 0.25;
     }
 

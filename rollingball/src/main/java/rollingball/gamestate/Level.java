@@ -1,46 +1,41 @@
 package rollingball.gamestate;
 
-import rollingball.gamestate.Obstacles.Spike;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Supplier;
 
-// TODO: Stub class intended to be filled in & integrated on week 5.
-// This file exists for two reasons:
-// 1. Using an integer for level id allows for the program to enter invalid state; an enum does not
-// 2. The level definitions are likely going to be stored here as well, but we will see
-public enum Level {
-    LEVEL_1(
-        "Level 1",
-        -6.0, 0.0,
-        6.0, 4.0,
-        new Obstacle[] {}
-    ),
-    LEVEL_2(
-        "Level 2",
-        -6.0, 4.0,
-        6.0, 4.0,
-        new Obstacle[] {
-            new Spike(0.0, 6.0),
-            new Spike(0.0, 5.0),
-            new Spike(0.0, 4.0),
-            new Spike(0.0, 3.0),
-            new Spike(0.0, 2.0),
-            new Spike(0.0, 1.0),
-            new Spike(0.0, 0.0),
+public class Level {
+    public static final record XY(double x, double y) {
+        public static XY of(double x, double y) {
+            return new XY(x, y);
         }
-    ),
-    ;
+    }
 
+    private final List<Obstacle> obstacles;
+    
     public final String name;
-    public final double startX, startY;
-    public final double endX, endY;
+    public XY start;
+    public XY end;
 
-    public final Obstacle[] obstacles;
+    public final Supplier<Level> nextLevel;
 
-    private Level(String name, double startX, double startY, double endX, double endY, Obstacle[] obstacles) {
+    public Level(String name, XY start, XY end, List<Obstacle> obstacles, Supplier<Level> nextLevel) {
         this.name = name;
-        this.startX = startX;
-        this.startY = startY;
-        this.endX = endX;
-        this.endY = endY;
+        this.start = start;
+        this.end = end;
         this.obstacles = obstacles;
+
+        this.nextLevel = nextLevel;
+    }
+
+    public void onUpdate(double timeSeconds, double deltaTime) {
+    }
+
+    public Level nextLevel() {
+        return nextLevel.get();
+    }
+
+    public List<Obstacle> getObstacles() {
+        return Collections.unmodifiableList(obstacles);
     }
 }

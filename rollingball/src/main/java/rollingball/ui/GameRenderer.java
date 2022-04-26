@@ -49,6 +49,7 @@ import rollingball.functions.ParserException;
 import rollingball.gamestate.GameState;
 import rollingball.gamestate.GoldenSectionSearch;
 import rollingball.gamestate.Level;
+import rollingball.gamestate.Levels;
 import rollingball.gamestate.Obstacles.Spike;
 import rollingball.gamestate.FunctionStorage.Graph;
 
@@ -92,8 +93,8 @@ public final class GameRenderer {
         drawObstacles();
         
         var level = state.getLevel();
-        graphics.fillOval(level.endX *PX_PER_GRAPH_AREA_UNIT - 3.5, -level.endY * PX_PER_GRAPH_AREA_UNIT - 3.5, 7, 7);
-        graphics.drawImage(flagTexture, level.endX * PX_PER_GRAPH_AREA_UNIT - 1.5625, -level.endY * PX_PER_GRAPH_AREA_UNIT - 50, 50, 50);
+        graphics.fillOval(level.end.x() *PX_PER_GRAPH_AREA_UNIT - 3.5, -level.end.y() * PX_PER_GRAPH_AREA_UNIT - 3.5, 7, 7);
+        graphics.drawImage(flagTexture, level.end.x() * PX_PER_GRAPH_AREA_UNIT - 1.5625, -level.end.y() * PX_PER_GRAPH_AREA_UNIT - 50, 50, 50);
 
         graphics.translate(-canvasWidth / 2, -canvasHeight / 2);
 
@@ -114,8 +115,8 @@ public final class GameRenderer {
     private void drawObstacles() {
         graphics.setStroke(Color.BLACK);
         graphics.setFill(Color.BLACK);
-        var obstacles = state.getLevel().obstacles;
-        for (var obstacle : obstacles) {
+        
+        for (var obstacle : state.getLevel().getObstacles()) {
             var random = obstacle.hashCode(); // poor way to get per-obstacle "random" value...
             if (obstacle instanceof Spike s) {
                 for (var i = 0; i < 5; ++i) {
@@ -270,12 +271,10 @@ public final class GameRenderer {
                 alert.setHeaderText("You won!");
                 alert.showAndWait();
 
-                var levels = Level.values();
-                if (level.ordinal() == levels.length-1) {
-                    // last level?
+                var nextLevel = level.nextLevel();
+                if (nextLevel == null) {
                     primaryStage.setScene(sceneHistory.pop());
                 } else {
-                    var nextLevel = levels[(levels.length + level.ordinal() + 1) % levels.length];
                     var scene = createGameScene(primaryStage, sceneHistory, nextLevel);
                     primaryStage.setScene(scene);
                 }

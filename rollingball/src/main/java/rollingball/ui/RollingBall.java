@@ -5,6 +5,7 @@ import java.util.Stack;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import rollingball.gamestate.Level;
+import rollingball.gamestate.Levels;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
@@ -39,7 +40,7 @@ public class RollingBall extends Application {
         var startButton = createButton("Start", 30, 20);
         startButton.setOnAction(e -> {
             sceneStack.push(scene);
-            primaryStage.setScene(GameRenderer.createGameScene(primaryStage, sceneStack, Level.LEVEL_1));
+            primaryStage.setScene(GameRenderer.createGameScene(primaryStage, sceneStack, Levels.LEVEL_1.createInstance()));
         });
         startButton.requestFocus();
 
