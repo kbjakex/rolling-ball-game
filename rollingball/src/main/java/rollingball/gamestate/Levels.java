@@ -3,7 +3,6 @@ package rollingball.gamestate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Supplier;
 
 import rollingball.gamestate.Level.XY;
 import rollingball.gamestate.Obstacles.Spike;
@@ -13,11 +12,11 @@ public enum Levels {
         @Override
         public Level createInstance() {
             return new Level(
-                name, 
-                XY.of(-6, 0), // Start (x,y)
-                XY.of(6, 4), // End (x,y)
-                Collections.emptyList(), // Obstacles
-                () -> LEVEL_2.createInstance() // Next level
+                    name,
+                    XY.of(-6, 0), // Start (x,y)
+                    XY.of(6, 4), // End (x,y)
+                    Collections.emptyList(), // Obstacles
+                    () -> LEVEL_2.createInstance() // Next level
             );
         }
     },
@@ -69,8 +68,8 @@ public enum Levels {
             for (int i = 0; i < 8; i++) {
                 obstacles.add(new Spike(-i, 2));
                 obstacles.add(new Spike(-i, -2));
-                obstacles.add(new Spike(i+1, 2 + 3 * Math.cos((i-3) / 7.0 * Math.PI)));
-                obstacles.add(new Spike(i+1, -2 + 3 * Math.cos((i-3) / 7.0 * Math.PI)));
+                obstacles.add(new Spike(i + 1, 2 + 3 * Math.cos((i - 3) / 7.0 * Math.PI)));
+                obstacles.add(new Spike(i + 1, -2 + 3 * Math.cos((i - 3) / 7.0 * Math.PI)));
             }
 
             return new Level4(name, XY.of(-6, 0), XY.of(6, 0), obstacles);
@@ -82,7 +81,6 @@ public enum Levels {
     private Levels(String name) {
         this.name = name;
     }
-
 
     public abstract Level createInstance();
 

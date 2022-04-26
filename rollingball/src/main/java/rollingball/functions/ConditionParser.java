@@ -24,17 +24,17 @@ public final class ConditionParser extends ParserBase<Condition> {
 
         var first = src[srcPos++];
         var eq = consume('=');
-        return switch (first) {
+        var res = switch (first) {
             case '<' -> eq ? RelationalOp.LE : RelationalOp.LT;
             case '>' -> eq ? RelationalOp.GE : RelationalOp.GT;
             case '=' -> eq ? RelationalOp.EQ : null;
             case '!' -> eq ? RelationalOp.NE : null;
-            default -> {
-                srcPos--;
-                if (eq) srcPos --;
-                yield null;
-            }
+            default -> null;
         };
+        if (res == null) {
+            srcPos -= eq ? 2 : 1;
+        }
+        return res;
     }
 
     private Expr parseExpr() {
@@ -46,10 +46,16 @@ public final class ConditionParser extends ParserBase<Condition> {
     private Condition parseCondition() {
         var lhs = parseExpr();
         var op = tryParseRelationalOp();
+        if (op == null) {
+            throw new ParserException("Expected a relational operator, found '%s'", srcPos == src.length ? "(end of expression)" : ("" + src[srcPos]));
+        }
+
         var rhs = parseExpr();
-
         var condition = packCondition(lhs, op, rhs);
+        return parseComplexCondition(condition, rhs, op);        
+    }
 
+    private Condition parseComplexCondition(Condition condition, Expr rhs, RelationalOp op) {
         while (true) {
             var nextOp = tryParseRelationalOp();
             if (nextOp == null) {
@@ -67,16 +73,13 @@ public final class ConditionParser extends ParserBase<Condition> {
     }
 
     private Condition packCondition(Expr lhs, RelationalOp op, Expr rhs) {
-        return switch(op) {
+        return switch (op) {
             case LT -> ctx -> lhs.eval(ctx) < rhs.eval(ctx);
             case LE -> ctx -> lhs.eval(ctx) <= rhs.eval(ctx);
             case GT -> ctx -> lhs.eval(ctx) > rhs.eval(ctx);
             case GE -> ctx -> lhs.eval(ctx) >= rhs.eval(ctx);
             case EQ -> ctx -> lhs.eval(ctx) == rhs.eval(ctx);
             case NE -> ctx -> lhs.eval(ctx) != rhs.eval(ctx);
-            default -> {
-                throw new ParserException("Invalid relational operator");
-            }
         };
     }
 

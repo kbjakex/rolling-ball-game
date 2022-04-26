@@ -10,7 +10,6 @@ import rollingball.functions.EvalContext;
 import rollingball.functions.FunctionParser;
 import rollingball.functions.ParserException;
 
-// TODO update tests to account for major refactorings
 public class FunctionParserTest {
     // doubles aren't exact, but on top of that, the double parser is definitely not exact, so use an epsilon 
     private static final double EPSILON = 0.00001;
@@ -195,5 +194,73 @@ public class FunctionParserTest {
     public void trailingContentsThrows() {
         assertThrowsExactly(ParserException.class, () -> FunctionParser.parse("(5+3))", "").eval(null));
         assertThrowsExactly(ParserException.class, () -> FunctionParser.parse("(5+3)3", "").eval(null));
+    }
+
+    @Test
+    public void testRelationalOpsWork() {
+        assertEquals(false, FunctionParser.parse("", "5 < 3").canEval(null));
+        assertEquals(false, FunctionParser.parse("", "5 < 5").canEval(null));
+        assertEquals(true, FunctionParser.parse("", "5 < 5.1").canEval(null));
+
+        assertEquals(true, FunctionParser.parse("", "5 > 3").canEval(null));
+        assertEquals(false, FunctionParser.parse("", "3 > 3").canEval(null));
+        assertEquals(false, FunctionParser.parse("", "2 > 3").canEval(null));
+        
+        assertEquals(false, FunctionParser.parse("", "5 <= 4.9").canEval(null));
+        assertEquals(true, FunctionParser.parse("", "5 <= 5").canEval(null));
+        assertEquals(true, FunctionParser.parse("", "5 <= 5.1").canEval(null));
+
+        assertEquals(true, FunctionParser.parse("", "5 >= 3").canEval(null));
+        assertEquals(true, FunctionParser.parse("", "3 >= 3").canEval(null));
+        assertEquals(false, FunctionParser.parse("", "2.9 >= 3").canEval(null));
+        
+        assertEquals(false, FunctionParser.parse("", "5 == 3").canEval(null));
+        assertEquals(true, FunctionParser.parse("", "5 == 5").canEval(null));
+        
+        assertEquals(true, FunctionParser.parse("", "5 != 3").canEval(null));
+        assertEquals(false, FunctionParser.parse("", "3 != 3").canEval(null));
+    }
+
+    @Test
+    public void testInvalidRelationalOpThrows() {
+        assertThrowsExactly(ParserException.class, () -> FunctionParser.parse("", "5 ! 3").eval(null));
+        assertThrowsExactly(ParserException.class, () -> FunctionParser.parse("", "5 _ 3").eval(null));
+    }
+
+    @Test
+    public void testConditionalBoundsWork() {
+        var ctx = new EvalContext(0.0);
+        
+        var fn = FunctionParser.parse("x", "0 < x < 5");
+        ctx.x = 0.0;
+        assertEquals(false, fn.canEval(ctx));
+        ctx.x = 1.0;
+        assertEquals(true, fn.canEval(ctx));
+        ctx.x = 5.0;
+        assertEquals(false, fn.canEval(ctx));
+
+        fn = FunctionParser.parse("x", "0 <= x < 5");
+        ctx.x = 0.0;
+        assertEquals(true, fn.canEval(ctx));
+        ctx.x = 1.0;
+        assertEquals(true, fn.canEval(ctx));
+        ctx.x = 5.0;
+        assertEquals(false, fn.canEval(ctx));
+
+        fn = FunctionParser.parse("x", "1 > x > -1");
+        ctx.x = -1;
+        assertEquals(false, fn.canEval(ctx));
+        ctx.x = 0.0;
+        assertEquals(true, fn.canEval(ctx));
+        ctx.x = 1.0;
+        assertEquals(false, fn.canEval(ctx));
+        
+        fn = FunctionParser.parse("x", "5 >= x > 0");
+        ctx.x = 0.0;
+        assertEquals(false, fn.canEval(ctx));
+        ctx.x = 1.0;
+        assertEquals(true, fn.canEval(ctx));
+        ctx.x = 5.0;
+        assertEquals(true, fn.canEval(ctx));
     }
 }

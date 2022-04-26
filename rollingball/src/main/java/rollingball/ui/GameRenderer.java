@@ -49,7 +49,6 @@ import rollingball.functions.ParserException;
 import rollingball.gamestate.GameState;
 import rollingball.gamestate.GoldenSectionSearch;
 import rollingball.gamestate.Level;
-import rollingball.gamestate.Levels;
 import rollingball.gamestate.Obstacles.Spike;
 import rollingball.gamestate.FunctionStorage.Graph;
 

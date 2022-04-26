@@ -4,7 +4,6 @@ import java.util.Stack;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
-import rollingball.gamestate.Level;
 import rollingball.gamestate.Levels;
 import javafx.scene.Node;
 import javafx.scene.Scene;

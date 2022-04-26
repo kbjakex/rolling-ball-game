@@ -102,15 +102,14 @@ public final class GameState {
         if (this.isPlaying) {
             var timeSeconds = (System.nanoTime() / 1_000_000.0 - this.startTimeMs) / 1000.0;
             var deltaTime = timeSeconds - this.timeOnLastUpdate;
-            
+
             this.level.onUpdate(timeSeconds, deltaTime);
 
             updateBallPos(timeSeconds, deltaTime);
             if (checkShouldDie()) {
                 togglePlaying();
                 playEndCallback.accept(false);
-            }
-            else if (checkIsTouchingFlag()) {
+            } else if (checkIsTouchingFlag()) {
                 togglePlaying();
                 playEndCallback.accept(true);
             }
@@ -120,7 +119,7 @@ public final class GameState {
     }
 
     private boolean checkShouldDie() {
-        if (theBall.y < -LEVEL_HEIGHT-1 || theBall.y > LEVEL_HEIGHT+1) {
+        if (theBall.y < -LEVEL_HEIGHT - 1 || theBall.y > LEVEL_HEIGHT + 1) {
             return true;
         }
 
@@ -135,7 +134,7 @@ public final class GameState {
     private boolean checkIsTouchingFlag() {
         var dx = theBall.x - level.end.x();
         var dy = theBall.y - level.end.y();
-        return dx*dx + dy*dy < 0.25;
+        return dx * dx + dy * dy < 0.25;
     }
 
     private void updateBallPos(double time, double deltaTime) {
@@ -171,13 +170,18 @@ public final class GameState {
 
         var dy = computeApproxCurveDerivative(theBall.collidingCurve, theBall.x, ctx);
 
-        // By max(0, ...)'ing, only upwards slopes affect the speed. This is "unfair" to the player,
-        // but I hadn't realized that *not* doing that would make any curve equally fast to travel, regardless of speed.
-        // That is because, for example, `integral(derivative(x^2), -p, p) = 0` for any p, and same goes for sin(), etc;
+        // By max(0, ...)'ing, only upwards slopes affect the speed. This is "unfair" to
+        // the player,
+        // but I hadn't realized that *not* doing that would make any curve equally fast
+        // to travel, regardless of speed.
+        // That is because, for example, `integral(derivative(x^2), -p, p) = 0` for any
+        // p, and same goes for sin(), etc;
         // any function that start and ends from some height h.
-        // Really, the speed should be calculated such that a curve of length x takes the same amount of time to travel
-        // as a straight, flat line of length x - as in, only curve length should affect the total time.
-        return (BALL_SPEED - 0.5*Math.max(0, dy)) * deltaTime;
+        // Really, the speed should be calculated such that a curve of length x takes
+        // the same amount of time to travel
+        // as a straight, flat line of length x - as in, only curve length should affect
+        // the total time.
+        return (BALL_SPEED - 0.5 * Math.max(0, dy)) * deltaTime;
     }
 
     private double computeGravity(double time) {
@@ -186,8 +190,8 @@ public final class GameState {
 
     private static double computeApproxCurveDerivative(Graph graph, double x, EvalContext ctx) {
         var dx = 0.01;
-        var y1 = graph.fn.evalAt(x - dx/2.0, ctx);
-        var y2 = graph.fn.evalAt(x + dx/2.0, ctx);
+        var y1 = graph.fn.evalAt(x - dx / 2.0, ctx);
+        var y2 = graph.fn.evalAt(x + dx / 2.0, ctx);
         return (y2 - y1) / dx;
     }
 }

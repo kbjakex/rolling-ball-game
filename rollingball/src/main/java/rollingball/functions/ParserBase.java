@@ -1,7 +1,8 @@
 package rollingball.functions;
 
 public abstract class ParserBase<T> {
-    public static record ParseResult<T>(T value, int nextCharIdx) {}
+    public static record ParseResult<T>(T value, int nextCharIdx) {
+    }
 
     protected char[] src;
     protected int srcPos;
@@ -9,7 +10,9 @@ public abstract class ParserBase<T> {
     protected abstract T doParse();
 
     public final ParseResult<T> parse(char[] src, int startIdx) {
-        if (src.length == 0) return new ParseResult<>(null, 0);
+        if (src.length == 0) {
+            return new ParseResult<>(null, 0);
+        }
 
         this.src = src;
         this.srcPos = startIdx;
