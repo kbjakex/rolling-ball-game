@@ -27,7 +27,7 @@ mvn test
 Testikattavuusraportti luodaan seuraavasti:
 
 ```console
-mvn jacoco:report
+mvn test jacoco:report
 ```
 Raportti luodaan tiedostoon `index.html` polussa `target/site/jacoco/`.
 
