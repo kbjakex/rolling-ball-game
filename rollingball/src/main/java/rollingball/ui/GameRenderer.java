@@ -61,6 +61,8 @@ public final class GameRenderer {
     private static final double GRAPH_AREA_WIDTH_PX = GRAPH_AREA_WIDTH * PX_PER_GRAPH_AREA_UNIT;
     private static final double GRAPH_AREA_HEIGHT_PX = GRAPH_AREA_HEIGHT * PX_PER_GRAPH_AREA_UNIT;
 
+    private final Image flagTexture;
+
     private final Canvas canvas;
     private final GraphicsContext graphics;
 
@@ -73,6 +75,8 @@ public final class GameRenderer {
         this.state = state;
         this.graphics = canvas.getGraphicsContext2D();
         this.timeDisplay = timeDisplay;
+
+        this.flagTexture = new Image(Main.class.getClassLoader().getResourceAsStream("flag.png"));
     }
 
     private void onFrame(ActionEvent event) {
@@ -86,6 +90,11 @@ public final class GameRenderer {
         drawGrid();
         drawGraphs();
         drawBall();
+
+        
+        var level = state.getLevel();
+        graphics.fillOval(level.endX *PX_PER_GRAPH_AREA_UNIT - 3.5, level.endY * PX_PER_GRAPH_AREA_UNIT - 3.5, 7, 7);
+        graphics.drawImage(flagTexture, level.endX * PX_PER_GRAPH_AREA_UNIT - 1.5625, level.endY * PX_PER_GRAPH_AREA_UNIT - 50, 50, 50);
 
         graphics.translate(-canvasWidth / 2, -canvasHeight / 2);
 
@@ -168,8 +177,6 @@ public final class GameRenderer {
     }
 
     public static Scene createGameScene(Stage primaryStage, Stack<Scene> sceneHistory, Level level) {
-        var state = new GameState(level);
-
         var equationList = new ListView<HBox>();
         equationList.setFocusTraversable(false);
         equationList.getItems().add(new HBox(new Label(""))); // make ListView render
@@ -208,11 +215,77 @@ public final class GameRenderer {
             addEquationButton.fire();
         });
 
-        addEquationButton.setOnAction(e -> addExpression(equationInput, conditionInput, equationList, state));
-
         var equationControls = new HBox(equationInput, conditionInput, addEquationButton);
         equationControls.setPadding(new Insets(10.0));
         equationControls.setPrefWidth(Double.MAX_VALUE);
+
+        var timeLabel = new Label("Time: 0.0s");
+        timeLabel.setFont(new Font("Arial", 14));
+        timeLabel.setTextFill(Color.gray(0.3));
+        var timeArea = new StackPane(timeLabel);
+        StackPane.setAlignment(timeLabel, Pos.CENTER);
+        StackPane.setMargin(timeLabel, new Insets(18, 18, 18, 18));
+        timeArea.setPrefSize(120.0, 48.0);
+        timeArea.setBackground(new Background(new BackgroundFill(Color.gray(1.0, 0.7), CornerRadii.EMPTY, Insets.EMPTY)));
+        timeArea.setVisible(false);
+
+        var levelLabel = new Label(level.name);
+        levelLabel.setFont(new Font("Arial", 24));
+        levelLabel.setTextFill(Color.gray(0.3));
+
+        var playImg = new Image(Main.class.getClassLoader().getResourceAsStream("play.png"));
+        var pauseImg = new Image(Main.class.getClassLoader().getResourceAsStream("pause.png"));
+
+        var playButton = new ImageView(playImg);
+        playButton.setFitWidth(48.0);
+        playButton.setFitHeight(48.0);
+        var playButtonFrame = new Pane(playButton);
+        playButtonFrame.setMaxSize(48.0, 48.0);
+        playButtonFrame.setBackground(new Background(new BackgroundFill(Color.WHITE, new CornerRadii(5.0), Insets.EMPTY)));
+        playButtonFrame.setBorder(new Border(new BorderStroke(Color.LIGHTGRAY, BorderStrokeStyle.SOLID, new CornerRadii(5.0), new BorderWidths(2.0))));
+
+
+        var state = new GameState(level, victory -> Platform.runLater(() -> {
+            if (victory) {
+                var alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Victory!");
+                alert.setHeaderText("You won!");
+                alert.showAndWait();
+
+                var levels = Level.values();
+                if (level.ordinal() == levels.length-1) {
+                    // last level?
+                    primaryStage.setScene(sceneHistory.pop());
+                } else {
+                    var nextLevel = levels[(levels.length + level.ordinal() + 1) % levels.length];
+                    var scene = createGameScene(primaryStage, sceneHistory, nextLevel);
+                    primaryStage.setScene(scene);
+                }
+                return;
+            }
+            
+            playButton.setImage(playImg);
+            timeArea.setVisible(false);
+            levelLabel.setVisible(true);
+        }));
+
+        addEquationButton.setOnAction(e -> addExpression(equationInput, conditionInput, equationList, state));
+
+        playButtonFrame.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
+            if (playButton.getImage() == playImg) {
+                playButton.setImage(pauseImg);
+                timeArea.setVisible(true);
+                levelLabel.setVisible(false);
+            } else {
+                playButton.setImage(playImg);
+                timeArea.setVisible(false);
+                levelLabel.setVisible(true);
+            }
+
+            state.togglePlaying();
+        });
+
+        var centerPane = new StackPane(levelLabel, timeArea);
 
         var backButton = new Button("Back");
         backButton.setPrefSize(64, 48);
@@ -236,46 +309,6 @@ public final class GameRenderer {
             primaryStage.setScene(sceneHistory.pop());
         });
 
-        var timeLabel = new Label("Time: 0.0s");
-        timeLabel.setFont(new Font("Arial", 14));
-        timeLabel.setTextFill(Color.gray(0.3));
-        var timeArea = new StackPane(timeLabel);
-        StackPane.setAlignment(timeLabel, Pos.CENTER);
-        StackPane.setMargin(timeLabel, new Insets(18, 18, 18, 18));
-        timeArea.setPrefSize(120.0, 48.0);
-        timeArea.setBackground(new Background(new BackgroundFill(Color.gray(1.0, 0.7), CornerRadii.EMPTY, Insets.EMPTY)));
-        timeArea.setVisible(false);
-
-        var levelLabel = new Label(level.name);
-        levelLabel.setFont(new Font("Arial", 24));
-        levelLabel.setTextFill(Color.gray(0.3));
-
-        var centerPane = new StackPane(levelLabel, timeArea);
-
-        var playImg = new Image(Main.class.getClassLoader().getResourceAsStream("play.png"));
-        var pauseImg = new Image(Main.class.getClassLoader().getResourceAsStream("pause.png"));
-
-        var playButton = new ImageView(playImg);
-        playButton.setFitWidth(48.0);
-        playButton.setFitHeight(48.0);
-        var playButtonFrame = new Pane(playButton);
-        playButtonFrame.setMaxSize(48.0, 48.0);
-        playButtonFrame.setBackground(new Background(new BackgroundFill(Color.WHITE, new CornerRadii(5.0), Insets.EMPTY)));
-        playButtonFrame.setBorder(new Border(new BorderStroke(Color.LIGHTGRAY, BorderStrokeStyle.SOLID, new CornerRadii(5.0), new BorderWidths(2.0))));
-        playButtonFrame.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
-            if (playButton.getImage() == playImg) {
-                playButton.setImage(pauseImg);
-                timeArea.setVisible(true);
-                levelLabel.setVisible(false);
-            } else {
-                playButton.setImage(playImg);
-                timeArea.setVisible(false);
-                levelLabel.setVisible(true);
-            }
-
-            state.togglePlaying();
-        });
-
         var topUi = new HBox(playButtonFrame, createHSpacer(), centerPane, createHSpacer(), backButton);
         HBox.setMargin(playButtonFrame, new Insets(10, 26, 10, 10));
         HBox.setMargin(centerPane, new Insets(10, 10, 10, 10));
@@ -285,9 +318,10 @@ public final class GameRenderer {
         var desiredHeight = 800;
 
         var canvas = new Canvas(desiredWidth, desiredHeight);
-        var canvasPane = new StackPane(canvas, new VBox(topUi, createVSpacer()));
+        var canvasPane = new Pane(new StackPane(canvas, new VBox(topUi, createVSpacer())));
+        canvasPane.heightProperty().addListener((obs, oldVal, newVal) -> canvas.setHeight(newVal.doubleValue()));
 
-        var split = new SplitPane(new Pane(canvasPane), new VBox(equationControls, equationList));
+        var split = new SplitPane(canvasPane, new VBox(equationControls, equationList));
         split.setDividerPositions(0.9);
         split.setOrientation(Orientation.VERTICAL);
 
