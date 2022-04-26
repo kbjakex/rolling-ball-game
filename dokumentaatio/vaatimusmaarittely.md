@@ -16,21 +16,21 @@ Peli käynnistyy "päävalikkoon", josta päästään joko jatkamaan aiempaa pel
 
 ## Perusversion tarjoama toiminnallisuus
 
-- käyttäjä voi navigoida näkymästä toiseen eli selata kenttiä ja aloittaa pelaamisen (etusivun toiminnallisuus valmis)
+- käyttäjä voi navigoida näkymästä toiseen eli selata kenttiä ja aloittaa pelaamisen (**tehty**)
 - käyttäjä näkee kenttävalikkonäkymästä oman edistymisensä
 - käyttäjä voi jatkaa päävalikon "start"-painikketta käyttäen siitä kentästä, mihin viime pelikerralla jäi, tai ensimmäisestä, jos ei ole ennen pelannut
-- käyttäjä voi syöttää pelinäkymässä yhtälöitä muotoa `y = f(x)` tai `x = f(y)` (tehty)
-- yhtälöt piirtyvät pelikentälle graafisen laskimen tapaan (tehty)
-- pelin pallohahmo voi pyöriä näiden yhtälöiden muodostamien käyrien päällä
-- käyttäjä voi poistaa aiemmin lisäämiään yhtälöitä (tehty)
-- käyttäjä voi muokata aiemmin lisäämiään yhtälöitä
-- yhtälöt voivat sisältää muuttujan `t`, mikä kuvastaa aikaa (tehty)
-- muuttujan `t` arvo kasvaa monotonisesti ja alkaa aina suoritusyrityksen alkaessa nollasta
-- yhtälöitä voi rajata esim. välille `1 <= x <= 3` lisäämällä yhtälön perään `| (rajaus)`. Esimerkki: `y = sin(x) | 0 <= x <= 2*PI`
-- käyttäjä voi hävitä pelin a) pallon tippuessa pois pelialueelta tai b) törmäämällä esteeseen
+- käyttäjä voi syöttää pelinäkymässä yhtälöitä muotoa `y = f(x)` tai `x = f(y)` (**tehty**)
+- yhtälöt piirtyvät pelikentälle graafisen laskimen tapaan (**tehty**)
+- pelin pallohahmo voi pyöriä näiden yhtälöiden muodostamien käyrien päällä (**tehty**)
+- käyttäjä voi poistaa aiemmin lisäämiään yhtälöitä (**tehty**)
+- käyttäjä voi muokata aiemmin lisäämiään yhtälöitä (**tehty**)
+- yhtälöt voivat sisältää muuttujan `t`, mikä kuvastaa aikaa (**tehty**)
+- muuttujan `t` arvo kasvaa monotonisesti ja alkaa aina suoritusyrityksen alkaessa nollasta (**tehty**)
+- yhtälöitä voi rajata esim. välille `1 <= x <= 3` lisäämällä yhtälön perään `| (rajaus)`. Esimerkki: `y = sin(x) | 0 <= x <= 2*PI` (**tehty**)
+- käyttäjä voi hävitä pelin a) pallon tippuessa pois pelialueelta tai b) törmäämällä esteeseen (**tehty**)
 - käyttäjä voi kenttiä ratkaisemalla "avata" uusia kenttiä pelattavaksi
 - käyttäjä näkee kenttävalikkonäkymästä kenttäkohtaisen suorituksensa, mikä arvioidaan tähdillä (0-3 tähteä), joiden määrä lasketaan ensisijaisesti käytettyjen yhtälöiden määrästä (täydet kolme saa vain yhdellä yhtälöllä) ja toissijaisesti pallon kulkemisajan perusteella.
-- sovellus sisältää vähintään 5 kenttää
+- sovellus sisältää vähintään 5 kenttää (4/5 tehty)
 - sovellus tallentaa käyttäjän edistymisen sovellusbinäärin kanssa samaan kansioon binääritiedostoon "rollingballdata.dat"
 - sovellus lataa `rollingballdata.dat` tiedoston sisällön käynnistyessä
 
