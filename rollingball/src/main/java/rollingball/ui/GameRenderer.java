@@ -116,8 +116,9 @@ public final class GameRenderer {
         graphics.setStroke(Color.BLACK);
         graphics.setFill(Color.BLACK);
         
+        var index = 0;
         for (var obstacle : state.getLevel().getObstacles()) {
-            var random = obstacle.hashCode(); // poor way to get per-obstacle "random" value...
+            var random = ++index * 3; // poor way to get per-obstacle "random" value...
             if (obstacle instanceof Spike s) {
                 for (var i = 0; i < 5; ++i) {
                     var angle = Math.PI * 2 * i / 5 + Math.sin(System.currentTimeMillis() * 0.002 + random) * 0.1;

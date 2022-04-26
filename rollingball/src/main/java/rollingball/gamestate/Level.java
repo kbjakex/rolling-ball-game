@@ -11,7 +11,7 @@ public class Level {
         }
     }
 
-    private final List<Obstacle> obstacles;
+    protected final List<Obstacle> obstacles;
     
     public final String name;
     public XY start;
