@@ -104,7 +104,6 @@ public final class GameState {
             ctx.x = theBall.x;
             var y = graph.fn.eval(ctx);
             if (Double.isNaN(y) || y - 0.005 > theBall.y || !graph.fn.canEval(ctx)) {
-                System.out.println();
                 continue;
             }
 

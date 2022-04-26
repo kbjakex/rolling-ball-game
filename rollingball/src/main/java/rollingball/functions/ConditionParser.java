@@ -1,9 +1,16 @@
 package rollingball.functions;
 
 import rollingball.functions.Function.Condition;
+import rollingball.functions.Function.Expr;
 import rollingball.functions.Operators.RelationalOp;
 
 public final class ConditionParser extends ParserBase<Condition> {
+
+    private final ExpressionParser exprParser;
+
+    public ConditionParser() {
+        this.exprParser = new ExpressionParser();
+    }
 
     @Override
     protected final Condition doParse() {
@@ -30,19 +37,36 @@ public final class ConditionParser extends ParserBase<Condition> {
         };
     }
 
+    private Expr parseExpr() {
+        var result = exprParser.parse(this.src, this.srcPos);
+        this.srcPos = result.nextCharIdx();
+        return result.value();
+    }
+
     private Condition parseCondition() {
-        var exprParser = new ExpressionParser();
-
-        var lhsResult = exprParser.parse(this.src, this.srcPos);
-        var lhs = lhsResult.value();
-        this.srcPos = lhsResult.nextCharIdx();
-
+        var lhs = parseExpr();
         var op = tryParseRelationalOp();
-        
-        var rhsResult = exprParser.parse(this.src, this.srcPos);
-        var rhs = rhsResult.value();
-        this.srcPos = rhsResult.nextCharIdx();
+        var rhs = parseExpr();
 
+        var condition = packCondition(lhs, op, rhs);
+
+        while (true) {
+            var nextOp = tryParseRelationalOp();
+            if (nextOp == null) {
+                break;
+            }
+
+            var nextRhs = parseExpr();
+            var leftCondition = condition;
+            var rightCondition = packCondition(rhs, nextOp, nextRhs);
+            condition = ctx -> leftCondition.eval(ctx) && rightCondition.eval(ctx);
+            rhs = nextRhs;
+        }
+
+        return condition;
+    }
+
+    private Condition packCondition(Expr lhs, RelationalOp op, Expr rhs) {
         return switch(op) {
             case LT -> ctx -> lhs.eval(ctx) < rhs.eval(ctx);
             case LE -> ctx -> lhs.eval(ctx) <= rhs.eval(ctx);
