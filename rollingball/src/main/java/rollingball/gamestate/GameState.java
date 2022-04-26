@@ -8,6 +8,9 @@ import rollingball.functions.Function;
 import rollingball.gamestate.FunctionStorage.Graph;
 
 public final class GameState {
+    public static final int LEVEL_WIDTH = 8; // -8..8
+    public static final int LEVEL_HEIGHT = 8; // -8..8
+
     public static final class Ball {
         private double x;
         private double y;
@@ -101,7 +104,7 @@ public final class GameState {
             var deltaTime = timeSeconds - this.timeOnLastUpdate;
 
             updateBallPos(timeSeconds, deltaTime);
-            if (theBall.y < -10.0) {
+            if (checkShouldDie()) {
                 togglePlaying();
                 playEndCallback.accept(false);
             }
@@ -112,6 +115,19 @@ public final class GameState {
 
             this.timeOnLastUpdate = timeSeconds;
         }
+    }
+
+    private boolean checkShouldDie() {
+        if (theBall.y < -LEVEL_HEIGHT-1 || theBall.y > LEVEL_HEIGHT+1) {
+            return true;
+        }
+
+        for (var obstacle : level.obstacles) {
+            if (obstacle.checkWouldKill(theBall)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean checkIsTouchingFlag() {

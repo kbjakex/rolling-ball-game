@@ -1,6 +1,5 @@
 package rollingball.ui;
 
-import java.io.File;
 import java.util.Stack;
 
 import javafx.animation.KeyFrame;
@@ -28,7 +27,6 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.Border;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.BorderStroke;
 import javafx.scene.layout.BorderStrokeStyle;
 import javafx.scene.layout.BorderWidths;
@@ -51,11 +49,12 @@ import rollingball.functions.ParserException;
 import rollingball.gamestate.GameState;
 import rollingball.gamestate.GoldenSectionSearch;
 import rollingball.gamestate.Level;
+import rollingball.gamestate.Obstacles.Spike;
 import rollingball.gamestate.FunctionStorage.Graph;
 
 public final class GameRenderer {
-    private static final int GRAPH_AREA_WIDTH = 8; // -8..8
-    private static final int GRAPH_AREA_HEIGHT = 8; // -8..8
+    private static final int GRAPH_AREA_WIDTH = GameState.LEVEL_WIDTH;
+    private static final int GRAPH_AREA_HEIGHT = GameState.LEVEL_HEIGHT;
 
     private static final double PX_PER_GRAPH_AREA_UNIT = 50.0;
     private static final double GRAPH_AREA_WIDTH_PX = GRAPH_AREA_WIDTH * PX_PER_GRAPH_AREA_UNIT;
@@ -90,11 +89,11 @@ public final class GameRenderer {
         drawGrid();
         drawGraphs();
         drawBall();
-
+        drawObstacles();
         
         var level = state.getLevel();
-        graphics.fillOval(level.endX *PX_PER_GRAPH_AREA_UNIT - 3.5, level.endY * PX_PER_GRAPH_AREA_UNIT - 3.5, 7, 7);
-        graphics.drawImage(flagTexture, level.endX * PX_PER_GRAPH_AREA_UNIT - 1.5625, level.endY * PX_PER_GRAPH_AREA_UNIT - 50, 50, 50);
+        graphics.fillOval(level.endX *PX_PER_GRAPH_AREA_UNIT - 3.5, -level.endY * PX_PER_GRAPH_AREA_UNIT - 3.5, 7, 7);
+        graphics.drawImage(flagTexture, level.endX * PX_PER_GRAPH_AREA_UNIT - 1.5625, -level.endY * PX_PER_GRAPH_AREA_UNIT - 50, 50, 50);
 
         graphics.translate(-canvasWidth / 2, -canvasHeight / 2);
 
@@ -110,6 +109,25 @@ public final class GameRenderer {
                 ball.getX() * PX_PER_GRAPH_AREA_UNIT - diameter / 2.0,
                 -ball.getY() * PX_PER_GRAPH_AREA_UNIT - diameter,
                 diameter, diameter);
+    }
+
+    private void drawObstacles() {
+        graphics.setStroke(Color.BLACK);
+        graphics.setFill(Color.BLACK);
+        var obstacles = state.getLevel().obstacles;
+        for (var obstacle : obstacles) {
+            var random = obstacle.hashCode(); // poor way to get per-obstacle "random" value...
+            if (obstacle instanceof Spike s) {
+                for (var i = 0; i < 5; ++i) {
+                    var angle = Math.PI * 2 * i / 5 + Math.sin(System.currentTimeMillis() * 0.002 + random) * 0.1;
+                    var x = s.x() * PX_PER_GRAPH_AREA_UNIT;
+                    var y = s.y() * PX_PER_GRAPH_AREA_UNIT;
+                    var dx = Math.cos(angle) * 0.35 * PX_PER_GRAPH_AREA_UNIT;
+                    var dy = Math.sin(angle) * 0.35 * PX_PER_GRAPH_AREA_UNIT;
+                    graphics.strokeLine(x - dx, -y - dy, x + dx, -y + dy);
+                }
+            }
+        }
     }
 
     private void drawGraphs() {
@@ -287,7 +305,7 @@ public final class GameRenderer {
 
         var centerPane = new StackPane(levelLabel, timeArea);
 
-        var backButton = new Button("Back");
+        var backButton = new Button("Exit");
         backButton.setPrefSize(64, 48);
         backButton.setFont(new Font("Arial", 14));
         backButton.setBackground(new Background(new BackgroundFill(Color.WHITE, new CornerRadii(5.0), Insets.EMPTY)));
