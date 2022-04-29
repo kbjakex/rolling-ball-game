@@ -50,4 +50,4 @@ mvn compile exec:java -Dexec.mainClass=rollingball.ui.RollingBall
 
 ## Javan versio
 
-Java 10 on todennäköisesti riittävän uusi, mutta koodi on kirjoitettu ja testattu ainoastaan Java 17:lla. Voit ladata Java 17:n [täältä](https://jdk.java.net/17/).
+Koodi on kirjoitettu ja testattu ainoastaan Java 18:lla. Voit ladata Java 18:n [täältä](https://jdk.java.net/18/).
