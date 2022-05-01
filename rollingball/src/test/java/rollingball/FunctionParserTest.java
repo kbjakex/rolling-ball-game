@@ -116,6 +116,9 @@ public class FunctionParserTest {
 
         ctx.x = -2.0;
         assertEquals(-1.0, FunctionParser.parse("t + x", "").eval(ctx), EPSILON);
+        assertEquals(3.0, FunctionParser.parse("t - x", "").eval(ctx), EPSILON);
+        assertEquals(-2.0, FunctionParser.parse("t * x", "").eval(ctx), EPSILON);
+        assertEquals(-0.5, FunctionParser.parse("t / x", "").eval(ctx), EPSILON);
     }
 
     @Test
@@ -225,6 +228,23 @@ public class FunctionParserTest {
     public void testInvalidRelationalOpThrows() {
         assertThrowsExactly(ParserException.class, () -> FunctionParser.parse("", "5 ! 3").eval(null));
         assertThrowsExactly(ParserException.class, () -> FunctionParser.parse("", "5 _ 3").eval(null));
+    }
+
+    // Pow is tested separately because it's the only right-associative operator and takes a very different
+    // path in the parser.
+    @Test
+    public void testPowOperatorWorks() {
+        var ctx = new EvalContext(1.0);
+        ctx.x = 7.0;
+        assertEquals(Math.pow(5, 3), FunctionParser.parse("5^3", "").eval(null), EPSILON);
+        assertEquals(Math.pow(ctx.x, 2), FunctionParser.parse("x^2", "").eval(ctx), EPSILON);
+        assertEquals(-Math.pow(ctx.x, 2), FunctionParser.parse("-x^2", "").eval(ctx), EPSILON);
+        assertEquals(Math.pow(-ctx.x, 2), FunctionParser.parse("(-x)^2", "").eval(ctx), EPSILON);
+        assertEquals(Math.pow(ctx.x, 2), FunctionParser.parse("(x)^(2)", "").eval(ctx), EPSILON);
+        assertEquals(Math.pow(ctx.x, 2)+1, FunctionParser.parse("x^2+1", "").eval(ctx), EPSILON);
+        assertEquals(Math.pow(ctx.x, 2+1), FunctionParser.parse("x^(2+1)", "").eval(ctx), EPSILON);
+
+        assertEquals(1.0, FunctionParser.parse("x^0", "").eval(ctx), EPSILON);
     }
 
     @Test

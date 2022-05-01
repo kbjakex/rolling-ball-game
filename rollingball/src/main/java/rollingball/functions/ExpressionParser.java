@@ -76,7 +76,7 @@ public final class ExpressionParser extends ParserBase<Expr> {
         };
     }
 
-    private Expr parseOperandInner() {
+    private Expr parseOperandInner2() {
         if (consume('(')) {
             var result = parseExpr();
             expect(')', "Missing closing ')'");
@@ -90,15 +90,24 @@ public final class ExpressionParser extends ParserBase<Expr> {
         return parseConstant();
     }
 
+    private Expr parseOperandInner1() {
+        var result = parseOperandInner2();
+
+        if (consume('^')) {
+            var power = parseOperand();
+            return makeArithmetic(result, ArithmeticOp.POW, power);
+        }
+        return result;
+    }
+
     private Expr parseOperand() {
         var negate = consume('-');
-        var result = parseOperandInner();
+        var result = parseOperandInner1();
 
         if (negate) {
             return ctx -> -result.eval(ctx);
-        } else {
-            return result;
         }
+        return result;
     }
 
     private ArithmeticOp tryParseOperator() {
@@ -167,19 +176,23 @@ public final class ExpressionParser extends ParserBase<Expr> {
         var rhs = operandStack.remove(operandStack.size() - 1);
         var lhs = operandStack.remove(operandStack.size() - 1);
 
+        operandStack.add(makeArithmetic(lhs, mergedOp, rhs));
+    }
+
+    private Expr makeArithmetic(Expr lhs, ArithmeticOp op, Expr rhs) {
         var lhsConstEval = lhs.tryConstEvaluate();
         var rhsConstEval = rhs.tryConstEvaluate();
         if (lhsConstEval != null && rhsConstEval != null) {
-            operandStack.add(Expr.constant(mergedOp.apply(lhsConstEval, rhsConstEval)));
-        } else {
-            Expr expr = switch (mergedOp) {
-                case ADD -> ctx -> lhs.eval(ctx) + rhs.eval(ctx);
-                case SUB -> ctx -> lhs.eval(ctx) - rhs.eval(ctx);
-                case MUL -> ctx -> lhs.eval(ctx) * rhs.eval(ctx);
-                case DIV -> ctx -> lhs.eval(ctx) / rhs.eval(ctx);
-            };
-            operandStack.add(expr);
+            return Expr.constant(op.apply(lhsConstEval, rhsConstEval));
         }
+
+        return switch (op) {
+            case ADD -> ctx -> lhs.eval(ctx) + rhs.eval(ctx);
+            case SUB -> ctx -> lhs.eval(ctx) - rhs.eval(ctx);
+            case MUL -> ctx -> lhs.eval(ctx) * rhs.eval(ctx);
+            case DIV -> ctx -> lhs.eval(ctx) / rhs.eval(ctx);
+            case POW -> ctx -> Math.pow(lhs.eval(ctx), rhs.eval(ctx));
+        };
     }
 
 }

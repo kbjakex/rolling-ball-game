@@ -4,7 +4,7 @@ public final class Operators {
     private Operators() {} // Make non-instantiable
 
     public enum ArithmeticOp {
-        ADD(1), SUB(1), MUL(2), DIV(2);
+        ADD(1), SUB(1), MUL(2), DIV(2), POW(3);
 
         private final int precedence;
         private ArithmeticOp(int precedence) {
@@ -21,6 +21,7 @@ public final class Operators {
                 case SUB -> lhs - rhs;
                 case MUL -> lhs * rhs;
                 case DIV -> lhs / rhs;
+                case POW -> Math.pow(lhs, rhs);
             };
         }
     }
@@ -45,27 +46,6 @@ public final class Operators {
                 case GE -> lhs >= rhs;
                 case EQ -> lhs == rhs;
                 case NE -> lhs != rhs;
-            };
-        }
-    }
-
-    public enum BooleanOp {
-        AND(2), OR(1), NOT(3);
-
-        private final int precedence;
-        private BooleanOp(int precedence) {
-            this.precedence = precedence;
-        }
-
-        public int getPrecedence() {
-            return this.precedence;
-        }
-
-        public boolean apply(boolean lhs, boolean rhs) {
-            return switch (this) {
-                case AND -> lhs && rhs;
-                case OR -> lhs || rhs;
-                case NOT -> !lhs;
             };
         }
     }
