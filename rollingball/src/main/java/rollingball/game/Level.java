@@ -2,7 +2,6 @@ package rollingball.game;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Supplier;
 
 public class Level {
     /**
@@ -22,23 +21,19 @@ public class Level {
 
     protected final List<Obstacle> obstacles;
 
-    private final String name;
+    private final LevelBlueprint levelBlueprint;
     private XY start;
     private XY end;
 
-    public final Supplier<Level> nextLevel;
-
-    public Level(String name, XY start, XY end, List<Obstacle> obstacles, Supplier<Level> nextLevel) {
-        this.name = name;
+    public Level(LevelBlueprint level, XY start, XY end, List<Obstacle> obstacles) {
+        this.levelBlueprint = level;
         this.start = start;
         this.end = end;
         this.obstacles = obstacles;
-
-        this.nextLevel = nextLevel;
     }
 
     public String getName() {
-        return name;
+        return levelBlueprint.getName();
     }
 
     public XY getStart() {
@@ -53,7 +48,7 @@ public class Level {
     }
 
     public Level nextLevel() {
-        return nextLevel.get();
+        return levelBlueprint.next().createInstance();
     }
 
     public List<Obstacle> getObstacles() {

@@ -2,15 +2,16 @@ package rollingball.dao;
 
 import java.util.List;
 
-// TODO: Stub class intended to be filled in on the next week.
+import rollingball.game.LevelBlueprint;
+
 public interface UserProgressDao {
     static final class LevelCompletionInfo {
-        public final int levelNumber;
+        public final LevelBlueprint level;
         public final List<String> equationsUsed;
         public final double scorePercentage;
 
-        public LevelCompletionInfo(int levelNumber, List<String> equationsUsed, double scorePercentage) {
-            this.levelNumber = levelNumber;
+        public LevelCompletionInfo(LevelBlueprint level, List<String> equationsUsed, double scorePercentage) {
+            this.level = level;
             this.equationsUsed = equationsUsed;
             this.scorePercentage = scorePercentage;
         }
@@ -18,13 +19,13 @@ public interface UserProgressDao {
     
     void addLevelCompletion(LevelCompletionInfo levelCompletionInfo);
 
-    default void addLevelCompletion(int levelId, List<String> equationsUsed, double scorePercentage) {
-        addLevelCompletion(new LevelCompletionInfo(levelId, equationsUsed, scorePercentage));
+    default void addLevelCompletion(LevelBlueprint level, List<String> equationsUsed, double scorePercentage) {
+        addLevelCompletion(new LevelCompletionInfo(level, equationsUsed, scorePercentage));
     }
 
     List<LevelCompletionInfo> getLevelCompletions();
 
-    int getNextUncompletedLevelId();
+    LevelBlueprint getNextUncompletedLevel();
 
     void flushChanges() throws Exception;
 }

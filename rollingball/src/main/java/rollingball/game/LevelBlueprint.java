@@ -7,30 +7,39 @@ import java.util.List;
 import rollingball.game.Level.XY;
 import rollingball.game.Obstacles.Spike;
 
-public enum Levels {
-    LEVEL_1("Level 1") {
+public enum LevelBlueprint {
+    LEVEL_1(0, "Level 1") {
         @Override
         public Level createInstance() {
             return new Level(
-                    name,
+                    this,
                     XY.of(-6, 0), // Start (x,y)
                     XY.of(6, 4), // End (x,y)
-                    Collections.emptyList(), // Obstacles
-                    () -> LEVEL_2.createInstance() // Next level
+                    Collections.emptyList() // Obstacles
             );
         }
+
+        @Override
+        public LevelBlueprint next() {
+            return LevelBlueprint.LEVEL_2;
+        }
     },
-    LEVEL_2("Level 2") {
+    LEVEL_2(1, "Level 2") {
         @Override
         public Level createInstance() {
             var obstacles = new ArrayList<Obstacle>();
             for (int i = 0; i < 8; i++) {
                 obstacles.add(new Spike(0, i));
             }
-            return new Level(name, XY.of(-6, 3), XY.of(6, 3), obstacles, () -> LEVEL_3.createInstance());
+            return new Level(this, XY.of(-6, 3), XY.of(6, 3), obstacles);
+        }
+
+        @Override
+        public LevelBlueprint next() {
+            return LevelBlueprint.LEVEL_3;
         }
     },
-    LEVEL_3("Level 3") {
+    LEVEL_3(2, "Level 3") {
         @Override
         public Level createInstance() {
             var obstacles = new ArrayList<Obstacle>();
@@ -40,15 +49,20 @@ public enum Levels {
                 obstacles.add(new Spike(4, -i));
             }
 
-            return new Level(name, XY.of(-7, -3), XY.of(7, -3), obstacles, () -> LEVEL_4.createInstance());
+            return new Level(this, XY.of(-7, -3), XY.of(7, -3), obstacles);
+        }
+
+        @Override
+        public LevelBlueprint next() {
+            return LevelBlueprint.LEVEL_4;
         }
     },
-    LEVEL_4("Level 4") {
+    LEVEL_4(3, "Level 4") {
         static final class Level4 extends Level {
             private final List<Obstacle> basePositions;
 
-            Level4(String name, XY start, XY end, List<Obstacle> spikes) {
-                super(name, start, end, spikes, () -> null);
+            Level4(LevelBlueprint next, XY start, XY end, List<Obstacle> spikes) {
+                super(next, start, end, spikes);
                 this.basePositions = new ArrayList<>(spikes);
             }
 
@@ -72,18 +86,41 @@ public enum Levels {
                 obstacles.add(new Spike(i + 1, -2 + 3 * Math.cos((i - 3) / 7.0 * Math.PI)));
             }
 
-            return new Level4(name, XY.of(-6, 0), XY.of(6, 0), obstacles);
+            return new Level4(this, XY.of(-6, 0), XY.of(6, 0), obstacles);
+        }
+
+        @Override
+        public LevelBlueprint next() {
+            return null;
         }
     };
 
-    public final String name;
+    private final String name;
+    private final int id;
 
-    private Levels(String name) {
+    private LevelBlueprint(int id, String name) {
+        this.id = id;
         this.name = name;
+    }
+
+    public final String getName() {
+        return name;
+    }
+
+    public final int getId() {
+        return id;
     }
 
     public abstract Level createInstance();
 
-    void onUpdate(Level levelInstance, double timeSeconds) {
+    public abstract LevelBlueprint next();
+
+    public static LevelBlueprint fromId(int id) {
+        for (var level : values()) {
+            if (level.getId() == id) {
+                return level;
+            }
+        }
+        throw new IllegalArgumentException("No level with id " + id);
     }
 }

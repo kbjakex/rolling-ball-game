@@ -1,10 +1,14 @@
 package rollingball.ui;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Stack;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
-import rollingball.game.Levels;
+import rollingball.dao.FileUserProgressDao;
+import rollingball.dao.UserProgressDao;
+import rollingball.game.LevelBlueprint;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -15,8 +19,20 @@ import javafx.geometry.*;
 
 public class RollingBall extends Application {
 
+    private UserProgressDao progressDao;
+
     @Override
     public void init() throws Exception {
+        loadOrCreateSaveFile();
+    }
+
+    private void loadOrCreateSaveFile() throws IOException {
+        var saveFilePath = "rollingballdata.dat";
+        try {
+            progressDao = FileUserProgressDao.loadFromFile(saveFilePath);
+        } catch (FileNotFoundException ex) {
+            progressDao = FileUserProgressDao.empty(saveFilePath);
+        }
     }
 
     @Override
@@ -40,8 +56,13 @@ public class RollingBall extends Application {
         var startButton = createButton("Start", 30, 20);
         startButton.setOnAction(e -> {
             sceneStack.push(scene);
+
+            var nextLevel = progressDao.getNextUncompletedLevel();
+            if (nextLevel == null) { // game completed; start from level 1 again
+                nextLevel = LevelBlueprint.LEVEL_1;
+            }
             primaryStage
-                    .setScene(GameRenderer.createGameScene(primaryStage, sceneStack, Levels.LEVEL_1.createInstance()));
+                    .setScene(GameRenderer.createGameScene(primaryStage, sceneStack, nextLevel.createInstance()));
         });
         startButton.requestFocus();
 
@@ -89,8 +110,8 @@ public class RollingBall extends Application {
         levels.setPadding(new Insets(50, 50, 50, 50));
         levels.setFocusTraversable(false);
 
-        for (var level : Levels.values()) {
-            var levelButton = new Button(level.name);
+        for (var level : LevelBlueprint.values()) {
+            var levelButton = new Button(level.getName());
             levelButton.setPrefSize(250, 250);
             levelButton.setFont(new Font("Arial", 35));
             HBox.setMargin(levelButton, new Insets(10, 50, 10, 0));
@@ -162,7 +183,7 @@ public class RollingBall extends Application {
 
     @Override
     public void stop() throws Exception {
-
+        this.progressDao.flushChanges();
     }
 
     public static void main(String[] args) {

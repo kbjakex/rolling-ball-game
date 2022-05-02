@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import rollingball.game.LevelBlueprint;
+
 // TODO: Stub class intended to be integrated & tested for week 5. Changes might occur.
 public final class FileUserProgressDao implements UserProgressDao {
     private static final int HEADER_MAGIC = 0x9C6D12E9;
@@ -16,12 +18,12 @@ public final class FileUserProgressDao implements UserProgressDao {
     private final List<LevelCompletionInfo> levelCompletions;
     private final String saveFilePath;
 
-    private int nextUncompletedLevelId;
+    private LevelBlueprint nextUncompletedLevel;
 
-    private FileUserProgressDao(String filePath, List<LevelCompletionInfo> levelCompletions, int nextUncompleted) {
+    private FileUserProgressDao(String filePath, List<LevelCompletionInfo> levelCompletions, LevelBlueprint nextUncompleted) {
         this.levelCompletions = levelCompletions;
         this.saveFilePath = filePath;
-        this.nextUncompletedLevelId = nextUncompleted;
+        this.nextUncompletedLevel = nextUncompleted;
     }
 
     @Override
@@ -29,7 +31,7 @@ public final class FileUserProgressDao implements UserProgressDao {
         var it = levelCompletions.listIterator();
         while (it.hasNext()) {
             var levelCompletion = it.next();
-            if (levelCompletion.levelNumber != levelCompletionInfo.levelNumber) {
+            if (levelCompletion.level != levelCompletionInfo.level) {
                 continue;
             }
 
@@ -42,9 +44,8 @@ public final class FileUserProgressDao implements UserProgressDao {
         // Otherwise, add
         levelCompletions.add(levelCompletionInfo);
 
-        if (levelCompletionInfo.levelNumber == nextUncompletedLevelId) {
-            // TODO Easy way to enter invalid state. See gamestate/Level.java.
-            this.nextUncompletedLevelId += 1;
+        if (levelCompletionInfo.level == nextUncompletedLevel) {
+            this.nextUncompletedLevel = this.nextUncompletedLevel.next();
         }
     }
 
@@ -54,8 +55,8 @@ public final class FileUserProgressDao implements UserProgressDao {
     }
 
     @Override
-    public int getNextUncompletedLevelId() {
-        return nextUncompletedLevelId;
+    public LevelBlueprint getNextUncompletedLevel() {
+        return nextUncompletedLevel;
     }
 
     @Override
@@ -64,15 +65,19 @@ public final class FileUserProgressDao implements UserProgressDao {
             stream.writeInt(HEADER_MAGIC);
             stream.writeInt(levelCompletions.size());
             for (var levelCompletion : levelCompletions) {
-                stream.writeInt(levelCompletion.levelNumber);
+                stream.writeInt(levelCompletion.level.getId());
                 stream.writeInt(levelCompletion.equationsUsed.size());
                 for (var equation : levelCompletion.equationsUsed) {
                     stream.writeUTF(equation);
                 }
                 stream.writeDouble(levelCompletion.scorePercentage);
             }
-            stream.writeInt(nextUncompletedLevelId);
+            stream.writeInt(nextUncompletedLevel.getId());
         }
+    }
+
+    public static FileUserProgressDao empty(String filePath) {
+        return new FileUserProgressDao(filePath, new ArrayList<>(), LevelBlueprint.LEVEL_1);
     }
 
     public static FileUserProgressDao loadFromFile(String filePath) throws IOException {
@@ -82,7 +87,7 @@ public final class FileUserProgressDao implements UserProgressDao {
             }
 
             var levelCompletions = readLevelCompletions(stream);
-            var nextUncompleted = stream.readInt();
+            var nextUncompleted = LevelBlueprint.fromId(stream.readInt());
 
             return new FileUserProgressDao(filePath, levelCompletions, nextUncompleted);
         }
@@ -92,14 +97,14 @@ public final class FileUserProgressDao implements UserProgressDao {
         var levelCompletions = new ArrayList<LevelCompletionInfo>();
         var numLevels = stream.readInt();
         for (int i = 0; i < numLevels; i++) {
-            var levelNumber = stream.readInt();
+            var level = LevelBlueprint.fromId(stream.readInt());
             var numEquations = stream.readInt();
             var equationsUsed = new ArrayList<String>();
             for (int j = 0; j < numEquations; j++) {
                 equationsUsed.add(stream.readUTF());
             }
             var scorePercentage = stream.readDouble();
-            levelCompletions.add(new LevelCompletionInfo(levelNumber, equationsUsed, scorePercentage));
+            levelCompletions.add(new LevelCompletionInfo(level, equationsUsed, scorePercentage));
         }
         return levelCompletions;
     }
