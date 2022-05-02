@@ -1,4 +1,4 @@
-package rollingball.gamestate;
+package rollingball.game;
 
 import java.util.ArrayList;
 import java.util.Collections;

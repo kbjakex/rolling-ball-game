@@ -1,11 +1,11 @@
-package rollingball.gamestate;
+package rollingball.game;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import rollingball.gamestate.Level.XY;
-import rollingball.gamestate.Obstacles.Spike;
+import rollingball.game.Level.XY;
+import rollingball.game.Obstacles.Spike;
 
 public enum Levels {
     LEVEL_1("Level 1") {

@@ -4,7 +4,7 @@ public final class Function {
     @FunctionalInterface
     public interface Expr {
         double eval(EvalContext ctx);
-        
+
         default Double tryConstEvaluate() {
             return null;
         }
@@ -15,7 +15,7 @@ public final class Function {
                 public double eval(EvalContext ctx) {
                     return val;
                 }
-                
+
                 @Override
                 public Double tryConstEvaluate() {
                     return val;
@@ -38,7 +38,7 @@ public final class Function {
                 public boolean eval(EvalContext ctx) {
                     return result;
                 }
-                
+
                 @Override
                 public Boolean tryConstEvaluate() {
                     return result;
@@ -49,7 +49,7 @@ public final class Function {
 
     private final Expr formula;
     private final Condition condition;
-    
+
     public Function(Expr formula, Condition condition) {
         this.formula = formula;
         this.condition = condition;

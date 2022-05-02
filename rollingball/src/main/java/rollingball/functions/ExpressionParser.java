@@ -7,8 +7,8 @@ import java.util.function.Supplier;
 import rollingball.functions.Function.Expr;
 import rollingball.functions.Operators.ArithmeticOp;
 
-public final class ExpressionParser extends ParserBase<Expr> {
-    
+public final class ExpressionParser extends Parser<Expr> {
+
     @Override
     protected final Expr doParse() {
         return parseExpr();

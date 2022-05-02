@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import javafx.scene.paint.Color;
 import rollingball.functions.Function;
-import rollingball.gamestate.FunctionStorage;
+import rollingball.game.FunctionStorage;
 
 public class GraphStorageTest {
     private static final Function DUMMY_EXPR = new Function(ctx -> 0.0, ctx -> true);

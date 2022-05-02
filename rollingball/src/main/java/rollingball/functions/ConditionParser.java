@@ -4,7 +4,7 @@ import rollingball.functions.Function.Condition;
 import rollingball.functions.Function.Expr;
 import rollingball.functions.Operators.RelationalOp;
 
-public final class ConditionParser extends ParserBase<Condition> {
+public final class ConditionParser extends Parser<Condition> {
 
     private final ExpressionParser exprParser;
 
@@ -47,12 +47,13 @@ public final class ConditionParser extends ParserBase<Condition> {
         var lhs = parseExpr();
         var op = tryParseRelationalOp();
         if (op == null) {
-            throw new ParserException("Expected a relational operator, found '%s'", srcPos == src.length ? "(end of expression)" : ("" + src[srcPos]));
+            throw new ParserException("Expected a relational operator, found '%s'",
+                    srcPos == src.length ? "(end of expression)" : ("" + src[srcPos]));
         }
 
         var rhs = parseExpr();
         var condition = packCondition(lhs, op, rhs);
-        return parseComplexCondition(condition, rhs, op);        
+        return parseComplexCondition(condition, rhs, op);
     }
 
     private Condition parseComplexCondition(Condition condition, Expr rhs, RelationalOp op) {

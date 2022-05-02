@@ -16,7 +16,7 @@ public final class FunctionParser {
         return new Function(expr, cond);
     }
 
-    private static <T> T parseChecked(String input, ParserBase<T> parser) {
+    private static <T> T parseChecked(String input, Parser<T> parser) {
         var dense = removeWhitespace(input);
         if (dense.length == 0) {
             return null;

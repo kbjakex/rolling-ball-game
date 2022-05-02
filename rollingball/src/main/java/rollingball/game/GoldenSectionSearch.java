@@ -1,4 +1,4 @@
-package rollingball.gamestate;
+package rollingball.game;
 
 import rollingball.functions.EvalContext;
 import rollingball.functions.Function;

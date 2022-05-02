@@ -46,15 +46,15 @@ import rollingball.functions.EvalContext;
 import rollingball.functions.Function;
 import rollingball.functions.FunctionParser;
 import rollingball.functions.ParserException;
-import rollingball.gamestate.GameState;
-import rollingball.gamestate.GoldenSectionSearch;
-import rollingball.gamestate.Level;
-import rollingball.gamestate.Obstacles.Spike;
-import rollingball.gamestate.FunctionStorage.Graph;
+import rollingball.game.GameSimulator;
+import rollingball.game.GoldenSectionSearch;
+import rollingball.game.Level;
+import rollingball.game.FunctionStorage.Graph;
+import rollingball.game.Obstacles.Spike;
 
 public final class GameRenderer {
-    private static final int GRAPH_AREA_WIDTH = GameState.LEVEL_WIDTH;
-    private static final int GRAPH_AREA_HEIGHT = GameState.LEVEL_HEIGHT;
+    private static final int GRAPH_AREA_WIDTH = GameSimulator.LEVEL_WIDTH;
+    private static final int GRAPH_AREA_HEIGHT = GameSimulator.LEVEL_HEIGHT;
 
     private static final double PX_PER_GRAPH_AREA_UNIT = 50.0;
     private static final double GRAPH_AREA_WIDTH_PX = GRAPH_AREA_WIDTH * PX_PER_GRAPH_AREA_UNIT;
@@ -67,9 +67,9 @@ public final class GameRenderer {
 
     private final Label timeDisplay;
 
-    private final GameState state;
+    private final GameSimulator state;
 
-    private GameRenderer(Canvas canvas, GameState state, Label timeDisplay) {
+    private GameRenderer(Canvas canvas, GameSimulator state, Label timeDisplay) {
         this.canvas = canvas;
         this.state = state;
         this.graphics = canvas.getGraphicsContext2D();
@@ -90,10 +90,12 @@ public final class GameRenderer {
         drawGraphs();
         drawBall();
         drawObstacles();
-        
-        var level = state.getLevel();
-        graphics.fillOval(level.end.x() *PX_PER_GRAPH_AREA_UNIT - 3.5, -level.end.y() * PX_PER_GRAPH_AREA_UNIT - 3.5, 7, 7);
-        graphics.drawImage(flagTexture, level.end.x() * PX_PER_GRAPH_AREA_UNIT - 1.5625, -level.end.y() * PX_PER_GRAPH_AREA_UNIT - 50, 50, 50);
+
+        var end = state.getLevel().getEnd();
+        graphics.fillOval(end.x() * PX_PER_GRAPH_AREA_UNIT - 3.5, -end.y() * PX_PER_GRAPH_AREA_UNIT - 3.5,
+                7, 7);
+        graphics.drawImage(flagTexture, end.x() * PX_PER_GRAPH_AREA_UNIT - 1.5625,
+                -end.y() * PX_PER_GRAPH_AREA_UNIT - 50, 50, 50);
 
         graphics.translate(-canvasWidth / 2, -canvasHeight / 2);
 
@@ -114,7 +116,7 @@ public final class GameRenderer {
     private void drawObstacles() {
         graphics.setStroke(Color.BLACK);
         graphics.setFill(Color.BLACK);
-        
+
         var index = 0;
         for (var obstacle : state.getLevel().getObstacles()) {
             var random = ++index * 3; // poor way to get per-obstacle "random" value...
@@ -144,14 +146,16 @@ public final class GameRenderer {
         graphics.setStroke(graph.color);
         graphics.beginPath();
 
-        // TODO: here's a *really* sweet opportunity to cut down on the amount of work to do
-        // by approximating the second derivative and adjusting stepSize such that straight
+        // TODO: here's a *really* sweet opportunity to cut down on the amount of work
+        // to do
+        // by approximating the second derivative and adjusting stepSize such that
+        // straight
         // lines need much less vertices
         var stepSize = 2.0;
 
         for (var pixelX = -GRAPH_AREA_WIDTH_PX; pixelX <= GRAPH_AREA_WIDTH_PX; pixelX += stepSize) {
             ctx.x = pixelX / PX_PER_GRAPH_AREA_UNIT;
-            
+
             if (!graph.fn.canEval(ctx)) {
                 continue;
             }
@@ -213,7 +217,7 @@ public final class GameRenderer {
         conditionInput.setPrefWidth(200);
         conditionInput.setPromptText("Filter (ex: `0 < x < 1`)");
         HBox.setMargin(conditionInput, new Insets(0, 10, 0, 10));
-        
+
         // Make life easier by allowing enter instead of requiring user to click
         equationInput.setOnKeyPressed(keyEvent -> {
             if (keyEvent.getCode() == javafx.scene.input.KeyCode.ENTER) {
@@ -245,10 +249,11 @@ public final class GameRenderer {
         StackPane.setAlignment(timeLabel, Pos.CENTER);
         StackPane.setMargin(timeLabel, new Insets(18, 18, 18, 18));
         timeArea.setPrefSize(120.0, 48.0);
-        timeArea.setBackground(new Background(new BackgroundFill(Color.gray(1.0, 0.7), CornerRadii.EMPTY, Insets.EMPTY)));
+        timeArea.setBackground(
+                new Background(new BackgroundFill(Color.gray(1.0, 0.7), CornerRadii.EMPTY, Insets.EMPTY)));
         timeArea.setVisible(false);
 
-        var levelLabel = new Label(level.name);
+        var levelLabel = new Label(level.getName());
         levelLabel.setFont(new Font("Arial", 24));
         levelLabel.setTextFill(Color.gray(0.3));
 
@@ -260,11 +265,12 @@ public final class GameRenderer {
         playButton.setFitHeight(48.0);
         var playButtonFrame = new Pane(playButton);
         playButtonFrame.setMaxSize(48.0, 48.0);
-        playButtonFrame.setBackground(new Background(new BackgroundFill(Color.WHITE, new CornerRadii(5.0), Insets.EMPTY)));
-        playButtonFrame.setBorder(new Border(new BorderStroke(Color.LIGHTGRAY, BorderStrokeStyle.SOLID, new CornerRadii(5.0), new BorderWidths(2.0))));
+        playButtonFrame
+                .setBackground(new Background(new BackgroundFill(Color.WHITE, new CornerRadii(5.0), Insets.EMPTY)));
+        playButtonFrame.setBorder(new Border(new BorderStroke(Color.LIGHTGRAY, BorderStrokeStyle.SOLID,
+                new CornerRadii(5.0), new BorderWidths(2.0))));
 
-
-        var state = new GameState(level, victory -> Platform.runLater(() -> {
+        var state = new GameSimulator(level, victory -> Platform.runLater(() -> {
             if (victory) {
                 var alert = new Alert(Alert.AlertType.INFORMATION);
                 alert.setTitle("Victory!");
@@ -280,7 +286,7 @@ public final class GameRenderer {
                 }
                 return;
             }
-            
+
             playButton.setImage(playImg);
             timeArea.setVisible(false);
             levelLabel.setVisible(true);
@@ -308,7 +314,8 @@ public final class GameRenderer {
         backButton.setPrefSize(64, 48);
         backButton.setFont(new Font("Arial", 14));
         backButton.setBackground(new Background(new BackgroundFill(Color.WHITE, new CornerRadii(5.0), Insets.EMPTY)));
-        backButton.setBorder(new Border(new BorderStroke(Color.LIGHTGRAY, BorderStrokeStyle.SOLID, new CornerRadii(5.0), new BorderWidths(2.0))));
+        backButton.setBorder(new Border(new BorderStroke(Color.LIGHTGRAY, BorderStrokeStyle.SOLID, new CornerRadii(5.0),
+                new BorderWidths(2.0))));
         backButton.setOnAction(e -> {
             if (!state.getGraphs().isEmpty()) {
                 Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -366,7 +373,8 @@ public final class GameRenderer {
         return spacer;
     }
 
-    private static void addExpression(TextField equationInput, TextField conditionInput, ListView<HBox> equationList, GameState state) {
+    private static void addExpression(TextField equationInput, TextField conditionInput, ListView<HBox> equationList,
+            GameSimulator state) {
         var exprAsString = equationInput.getText();
         var condAsString = conditionInput.getText();
         var expr = readExpression(exprAsString, condAsString);
@@ -381,7 +389,8 @@ public final class GameRenderer {
 
         var rgb = graph.color;
         var equationInputField = new TextField(exprAsString);
-        equationInputField.setStyle(String.format("-fx-text-fill: rgb(%d, %d, %d);", (int)(255*rgb.getRed()), (int)(255*rgb.getGreen()), (int)(255*rgb.getBlue()))) ;
+        equationInputField.setStyle(String.format("-fx-text-fill: rgb(%d, %d, %d);", (int) (255 * rgb.getRed()),
+                (int) (255 * rgb.getGreen()), (int) (255 * rgb.getBlue())));
         HBox.setHgrow(equationInputField, Priority.ALWAYS);
 
         var conditionInputField = new TextField(condAsString);
@@ -405,7 +414,7 @@ public final class GameRenderer {
                 if (equationInputField.getText().isEmpty()) {
                     removeEquationButton.fire();
                 } else {
-                    graph.setFunction(readExpression(equationInputField.getText(), conditionInputField.getText()));   
+                    graph.setFunction(readExpression(equationInputField.getText(), conditionInputField.getText()));
                 }
             }
         });

@@ -1,13 +1,13 @@
-package rollingball.gamestate;
+package rollingball.game;
 
 import java.util.List;
 import java.util.function.Consumer;
 
 import rollingball.functions.EvalContext;
 import rollingball.functions.Function;
-import rollingball.gamestate.FunctionStorage.Graph;
+import rollingball.game.FunctionStorage.Graph;
 
-public final class GameState {
+public final class GameSimulator {
     public static final int LEVEL_WIDTH = 8; // -8..8
     public static final int LEVEL_HEIGHT = 8; // -8..8
 
@@ -31,8 +31,9 @@ public final class GameState {
         }
 
         public void reset(Level level) {
-            this.x = level.start.x();
-            this.y = level.start.y();
+            var start = level.getStart();
+            this.x = start.x();
+            this.y = start.y();
             this.lastCollisionTimestamp = 0.0;
         }
     }
@@ -52,7 +53,7 @@ public final class GameState {
 
     private Ball theBall;
 
-    public GameState(Level level, Consumer<Boolean> playEndCallback) {
+    public GameSimulator(Level level, Consumer<Boolean> playEndCallback) {
         this.graphs = new FunctionStorage();
         this.startTimeMs = 0.0;
         this.timeOnLastUpdate = 0.0;
@@ -132,8 +133,9 @@ public final class GameState {
     }
 
     private boolean checkIsTouchingFlag() {
-        var dx = theBall.x - level.end.x();
-        var dy = theBall.y - level.end.y();
+        var end = level.getEnd();
+        var dx = theBall.x - end.x();
+        var dy = theBall.y - end.y();
         return dx * dx + dy * dy < 0.25;
     }
 

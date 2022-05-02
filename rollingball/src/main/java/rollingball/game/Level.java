@@ -1,21 +1,30 @@
-package rollingball.gamestate;
+package rollingball.game;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
 public class Level {
+    /**
+     * Test
+     */
     public static final record XY(double x, double y) {
+        /**
+         * Creates an (x,y) coordinate pair from the parameters.
+         * @param x the x coordinate
+         * @param y the y coordinate
+         * @return the coordinate pair
+         */
         public static XY of(double x, double y) {
             return new XY(x, y);
         }
     }
 
     protected final List<Obstacle> obstacles;
-    
-    public final String name;
-    public XY start;
-    public XY end;
+
+    private final String name;
+    private XY start;
+    private XY end;
 
     public final Supplier<Level> nextLevel;
 
@@ -26,6 +35,18 @@ public class Level {
         this.obstacles = obstacles;
 
         this.nextLevel = nextLevel;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public XY getStart() {
+        return start;
+    }
+
+    public XY getEnd() {
+        return end;
     }
 
     public void onUpdate(double timeSeconds, double deltaTime) {

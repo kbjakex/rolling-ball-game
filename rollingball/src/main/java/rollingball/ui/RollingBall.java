@@ -4,7 +4,7 @@ import java.util.Stack;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
-import rollingball.gamestate.Levels;
+import rollingball.game.Levels;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -14,7 +14,7 @@ import javafx.scene.text.Font;
 import javafx.geometry.*;
 
 public class RollingBall extends Application {
-    
+
     @Override
     public void init() throws Exception {
     }
@@ -31,16 +31,17 @@ public class RollingBall extends Application {
 
         var mainMenu = new VBox();
         var scene = new Scene(mainMenu, 800, 800);
-        
+
         var sceneStack = new Stack<Scene>();
-        
+
         var titleLabel = createLabel("Rolling Ball Game", 50, 150);
         titleLabel.setUnderline(true);
-        
+
         var startButton = createButton("Start", 30, 20);
         startButton.setOnAction(e -> {
             sceneStack.push(scene);
-            primaryStage.setScene(GameRenderer.createGameScene(primaryStage, sceneStack, Levels.LEVEL_1.createInstance()));
+            primaryStage
+                    .setScene(GameRenderer.createGameScene(primaryStage, sceneStack, Levels.LEVEL_1.createInstance()));
         });
         startButton.requestFocus();
 
@@ -54,15 +55,14 @@ public class RollingBall extends Application {
         quitButton.setOnAction(e -> primaryStage.close());
 
         mainMenu.getChildren().addAll(
-            titleLabel,
-            startButton,
-            levelsButton,
-            quitButton
-        );
+                titleLabel,
+                startButton,
+                levelsButton,
+                quitButton);
 
         mainMenu.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
         mainMenu.setAlignment(Pos.TOP_CENTER);
-        
+
         return scene;
     }
 
@@ -72,12 +72,13 @@ public class RollingBall extends Application {
         layout.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
 
         var scene = new Scene(layout, 800, 800);
-        
+
         var backButton = new Button("Back");
         backButton.setPrefSize(64, 48);
         backButton.setFont(new Font("Arial", 14));
         backButton.setBackground(new Background(new BackgroundFill(Color.WHITE, new CornerRadii(5.0), Insets.EMPTY)));
-        backButton.setBorder(new Border(new BorderStroke(Color.LIGHTGRAY, BorderStrokeStyle.SOLID, new CornerRadii(5.0), new BorderWidths(2.0))));
+        backButton.setBorder(new Border(new BorderStroke(Color.LIGHTGRAY, BorderStrokeStyle.SOLID, new CornerRadii(5.0),
+                new BorderWidths(2.0))));
         backButton.setOnAction(e -> primaryStage.setScene(sceneHistory.pop()));
         HBox.setMargin(backButton, new Insets(10, 10, 10, 10));
 
@@ -112,7 +113,8 @@ public class RollingBall extends Application {
         title.setAlignment(Pos.CENTER);
         HBox.setMargin(title, new Insets(10, 10, 10, 10));
 
-        layout.getChildren().addAll(top, new HBox(createHSpacer(), title, createHSpacer()), createVSpacer(), levelView, createVSpacer());
+        layout.getChildren().addAll(top, new HBox(createHSpacer(), title, createHSpacer()), createVSpacer(), levelView,
+                createVSpacer());
         VBox.setMargin(levelView, new Insets(10, 10, 10, 10));
 
         return scene;
@@ -160,7 +162,7 @@ public class RollingBall extends Application {
 
     @Override
     public void stop() throws Exception {
-        
+
     }
 
     public static void main(String[] args) {

@@ -1,8 +1,7 @@
 package rollingball.functions;
 
-public abstract class ParserBase<T> {
-    public static record ParseResult<T>(T value, int nextCharIdx) {
-    }
+public abstract class Parser<T> {
+    public static record ParseResult<T>(T value, int nextCharIdx) { }
 
     protected char[] src;
     protected int srcPos;

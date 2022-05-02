@@ -1,6 +1,6 @@
-package rollingball.gamestate;
+package rollingball.game;
 
-import rollingball.gamestate.GameState.Ball;
+import rollingball.game.GameSimulator.Ball;
 
 public final class Obstacles {
     private Obstacles() {
