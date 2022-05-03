@@ -54,7 +54,7 @@ public final class GameSimulator {
 
     /**
      * Creates a new simulator for the given level. 
-     * @param graphs the function storage
+     * @param level the level
      * @param playEndCallback called when the game ends
      */
     public GameSimulator(Level level, GameEndCallback playEndCallback) {
@@ -107,8 +107,7 @@ public final class GameSimulator {
 
     /**
      * Adds a graph to the simulation.
-     * @param graph the graph to add
-     * @see {@link rollingball.game.FunctionStorage#addGraph(Graph)}
+     * @param fn the graph to add
      */
     public Graph addGraph(Function fn) {
         return graphs.addGraph(fn);
@@ -117,7 +116,6 @@ public final class GameSimulator {
     /**
      * Removes a graph from the simulation.
      * @param graph the graph to remove
-     * @see {@link rollingball.game.FunctionStorage#removeGraph()}
      */
     public void removeGraph(Graph graph) {
         graphs.removeGraph(graph);
@@ -125,7 +123,6 @@ public final class GameSimulator {
 
     /**
      * Returns the list of graphs currently in use.
-     * @see {@link rollingball.game.FunctionStorage#getGraphs()}
      */
     public List<Graph> getGraphs() {
         return graphs.getGraphs();

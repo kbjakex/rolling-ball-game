@@ -72,7 +72,7 @@ public final class FunctionStorage {
 
     /**
      * Adds a new graph to the storage.
-     * @param fn the function
+     * @param expr the function
      * @return the graph
      */
     public Graph addGraph(Function expr) {
