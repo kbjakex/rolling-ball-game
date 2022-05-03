@@ -30,3 +30,6 @@
 - Kenttävalikko on hiottu jotakuinkin vastaamaan suunnitelmaa graafisesti
 - Kentän läpäisystä saa pisteitä, joiden perusteella määräytyy tähtien määrä
 - Kaikki kentät eivät enää ole automaattisesti auki, vaan lukitun kentän saa auki ratkaisemalla edellisen kentän
+- Kaikki 5 kenttää ovat nyt pelissä ja kenttien vaikeustaso on nyt riittävä.
+- Javadoc-dokumentaatio on aloitettu; `game`- ja `ui`-kansiot ovat täysin dokumentoituja.
+- Peli ei enää käytä oikeaa aikaa ajan mittaukseen, minkä ansiosta peli on nyt reilu myös hitailla koneilla, deterministinen ja yksikkötestattava. Jokainen kenttä onkin nyt yksikkötestattu malliratkaisun avulla.
