@@ -30,7 +30,7 @@ public class GraphStorageTest {
         // Empirical testing, best-effort. Not entirely provable.
         for (int i = 0; i < 100; ++i) {
             var graph = graphs.addGraph(DUMMY_EXPR);
-            assertEquals(true, used.add(graph.color));
+            assertEquals(true, used.add(graph.getColor()));
         }
     }
 
@@ -41,7 +41,7 @@ public class GraphStorageTest {
 
         var graph2 = graphs.addGraph(DUMMY_EXPR);
 
-        assertEquals(graph.color, graph2.color);
+        assertEquals(graph.getColor(), graph2.getColor());
     }
 
     @Test

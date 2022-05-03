@@ -3,7 +3,9 @@ package rollingball.game;
 import rollingball.functions.EvalContext;
 import rollingball.functions.Function;
 
-/*
+import static rollingball.game.GameSimulator.BALL_RADIUS;
+
+/**
 Problem: For the ball to roll on *top* of the curves, simply computing its y (upwards) position as
 `f(x) + r` (where `r` is the radius of the ball) is not enough (unless for *perfectly* horizontal 
 lines). It would clip the curves on any upwards or downwards slopes.
@@ -25,16 +27,12 @@ it converges to doesn't matter as long as it truly is the highest point. So even
 make zero guarantees about what the user inputs (sin(x) would be multimodal), this is fine.
 */
 public final class GoldenSectionSearch {
-    private GoldenSectionSearch() {
+    private GoldenSectionSearch() { // make non-instantiable
     }
 
-    // (where should this be?)
-    public static final double BALL_RADIUS = 0.4;
-
+    // Constants for the golden-section search
     private static final double PHI = (1 + Math.sqrt(5.0)) / 2.0;
-
     private static final double TOLERANCE = 1e-6;
-
     private static final double BALL_DIAMETER = BALL_RADIUS * 2.0;
 
     // Number of steps required to achieve desired tolerance
@@ -82,8 +80,7 @@ public final class GoldenSectionSearch {
         }
 
         // The algorithm obviously gives an interval rather than a single point. With a
-        // low-enough
-        // tolerance, the midpoint of the interval should be a very good approximation.
+        // low-enough tolerance, the midpoint of the interval should be a very good approximation.
         ctx.x = (yc < yd) ? (a + d) / 2.0 : (c + b) / 2.0;
         return -evalAt(ctx.x, f, ctx, ballX);
     }

@@ -1,6 +1,5 @@
 package rollingball.ui;
 
-import java.util.ArrayList;
 import java.util.Stack;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -51,11 +50,20 @@ import rollingball.functions.Function;
 import rollingball.functions.FunctionParser;
 import rollingball.functions.ParserException;
 import rollingball.game.GameSimulator;
-import rollingball.game.GoldenSectionSearch;
 import rollingball.game.Level;
 import rollingball.game.FunctionStorage.Graph;
 import rollingball.game.Obstacles.Spike;
 
+/**
+ * A renderer for the game state. This class contains no game logic, and is
+ * responsible solely for drawing the game state to the screen. It is,
+ * however, responsible for calling the update() method of the GameSimulator.
+ * 
+ * <br>
+ * Note that there are two coordinate spaces here. The coordinate space of the
+ * level is defined by the LEVEL_WIDTH and LEVEL_HEIGHT constants in the GameSimulator class. 
+ * The rendering operates in screen coordinates, with the origin at the top left corner.
+ */
 public final class GameRenderer {
     private static final int GRAPH_AREA_WIDTH = GameSimulator.LEVEL_WIDTH;
     private static final int GRAPH_AREA_HEIGHT = GameSimulator.LEVEL_HEIGHT;
@@ -103,14 +111,14 @@ public final class GameRenderer {
 
         graphics.translate(-canvasWidth / 2, -canvasHeight / 2);
 
-        timeDisplay.setText(String.format("Time: %.2fs", state.getPlayingTimeMs() / 1000.0));
+        timeDisplay.setText(String.format("Time: %.2fs", state.getPlayingTimeSeconds()));
     }
 
     private void drawBall() {
         graphics.setStroke(Color.BLACK);
         graphics.setFill(Color.GRAY);
         var ball = state.getBall();
-        var diameter = GoldenSectionSearch.BALL_RADIUS * PX_PER_GRAPH_AREA_UNIT * 2.0;
+        var diameter = GameSimulator.BALL_RADIUS * PX_PER_GRAPH_AREA_UNIT * 2.0;
         graphics.fillOval(
                 ball.getX() * PX_PER_GRAPH_AREA_UNIT - diameter / 2.0,
                 -ball.getY() * PX_PER_GRAPH_AREA_UNIT - diameter,
@@ -138,7 +146,7 @@ public final class GameRenderer {
     }
 
     private void drawGraphs() {
-        var evalCtx = new EvalContext(state.getPlayingTimeMs() / 1000.0);
+        var evalCtx = new EvalContext(state.getPlayingTimeSeconds());
 
         graphics.setLineWidth(2.0);
         for (var graph : state.getGraphs()) {
@@ -147,7 +155,7 @@ public final class GameRenderer {
     }
 
     private void renderGraph(Graph graph, EvalContext ctx) {
-        graphics.setStroke(graph.color);
+        graphics.setStroke(graph.getColor());
         graphics.beginPath();
 
         // TODO: here's a *really* sweet opportunity to cut down on the amount of work
@@ -156,21 +164,21 @@ public final class GameRenderer {
         // straight
         // lines need much less vertices
         var stepSize = 2.0;
-
+        var fn = graph.geFunction();
         for (var pixelX = -GRAPH_AREA_WIDTH_PX; pixelX <= GRAPH_AREA_WIDTH_PX; pixelX += stepSize) {
             ctx.x = pixelX / PX_PER_GRAPH_AREA_UNIT;
 
-            if (!graph.fn.canEval(ctx)) {
+            if (!fn.canEval(ctx)) {
                 continue;
             }
 
             // up is negative in screen coords so negate the value
-            graphics.moveTo(pixelX, -graph.fn.eval(ctx) * PX_PER_GRAPH_AREA_UNIT);
+            graphics.moveTo(pixelX, -fn.eval(ctx) * PX_PER_GRAPH_AREA_UNIT);
             pixelX += stepSize;
             ctx.x += stepSize / PX_PER_GRAPH_AREA_UNIT;
 
-            while (graph.fn.canEval(ctx) && pixelX <= GRAPH_AREA_WIDTH_PX) {
-                graphics.lineTo(pixelX, -graph.fn.eval(ctx) * PX_PER_GRAPH_AREA_UNIT);
+            while (fn.canEval(ctx) && pixelX <= GRAPH_AREA_WIDTH_PX) {
+                graphics.lineTo(pixelX, -fn.eval(ctx) * PX_PER_GRAPH_AREA_UNIT);
 
                 pixelX += stepSize;
                 ctx.x += stepSize / PX_PER_GRAPH_AREA_UNIT;
@@ -203,6 +211,12 @@ public final class GameRenderer {
         graphics.strokeLine(0.0, -GRAPH_AREA_HEIGHT_PX, 0.0, GRAPH_AREA_HEIGHT_PX);
     }
 
+    /**
+     * Creates the user interface for the game for the given level.
+     * @param primaryStage the stage variable used in the JavaFX application
+     * @param sceneHistory the stack of previous scenes
+     * @param level the level to create the user interface for
+     */
     public static Scene createGameScene(Stage primaryStage, Stack<Supplier<Scene>> sceneHistory, UserProgressDao progressDao, Level level) {
         var equationList = new ListView<HBox>();
         equationList.setFocusTraversable(false);
@@ -296,11 +310,11 @@ public final class GameRenderer {
                 alert.setHeaderText("You won!");
                 alert.showAndWait();
 
-                var nextLevel = level.nextLevel();
+                var nextLevel = level.getBlueprint().next();
                 if (nextLevel == null) {
                     primaryStage.setScene(sceneHistory.pop().get());
                 } else {
-                    var scene = createGameScene(primaryStage, sceneHistory, progressDao, nextLevel);
+                    var scene = createGameScene(primaryStage, sceneHistory, progressDao, nextLevel.createInstance());
                     primaryStage.setScene(scene);
                 }
                 return;
@@ -413,7 +427,7 @@ public final class GameRenderer {
 
         var graph = state.addGraph(expr);
 
-        var rgb = graph.color;
+        var rgb = graph.getColor();
         var equationInputField = new TextField(exprAsString);
         equationInputField.setStyle(String.format("-fx-text-fill: rgb(%d, %d, %d);", (int) (255 * rgb.getRed()),
                 (int) (255 * rgb.getGreen()), (int) (255 * rgb.getBlue())));

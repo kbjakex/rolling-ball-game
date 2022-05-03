@@ -1,25 +1,44 @@
 package rollingball.game;
 
 import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 import rollingball.functions.EvalContext;
 import rollingball.functions.Function;
 import rollingball.game.FunctionStorage.Graph;
 
+/**
+ * Contains the game state for a level, and the update logic.
+ * The purpose of the class is to simulate the path of the ball to
+ * figure out if the ball will end up reaching the flag using
+ * the entered equations.
+ */
 public final class GameSimulator {
+    /**
+     * Width of the playing field, to both directions from the origin.
+     * Total width is therefore technically twice this.
+     */
     public static final int LEVEL_WIDTH = 8; // -8..8
+    /**
+     * Height of the playing field, to both directions from the origin.
+     * Total height is therefore technically twice this.
+     */
     public static final int LEVEL_HEIGHT = 8; // -8..8
+    /**
+     * The radius of the ball in level coordinates.
+     */
+    public static final double BALL_RADIUS = 0.4;
 
+    /**
+     * The ball itself. Mostly an (x,y) pair.
+     */
     public static final class Ball {
         private double x;
         private double y;
-        private Graph collidingCurve;
 
+        private Graph collidingCurve;
         private double lastCollisionTimestamp;
 
-        public Ball(Level level) {
+        private Ball(Level level) {
             reset(level);
         }
 
@@ -31,12 +50,29 @@ public final class GameSimulator {
             return y;
         }
 
+        /**
+         * Resets the ball to the start position of the level.
+         * @param level the level
+         */
         public void reset(Level level) {
             var start = level.getStart();
             this.x = start.x();
             this.y = start.y();
             this.lastCollisionTimestamp = 0.0;
         }
+    }
+
+    /**
+     * A callback for communicating when the simulation stops for any reason.
+     */
+    @FunctionalInterface
+    public interface GameEndCallback {
+        /**
+         * Called when the game ends.
+         * @param victory true if the ball reached the flag, false if it died or escaped the screen
+         * @param playTimeSeconds the time, in seconds, the ball spent in the game
+         */
+        void onGameEnd(boolean victory, double playTimeSeconds);
     }
 
     private static final double BALL_SPEED = 1.5; // grid units per second
@@ -46,17 +82,22 @@ public final class GameSimulator {
 
     private Level level;
 
-    private double startTimeMs;
+    private double startTimeSeconds;
     private boolean isPlaying;
-    private final BiConsumer<Boolean, Double> playEndCallback;
+    private final GameEndCallback playEndCallback;
 
     private double timeOnLastUpdate;
 
     private Ball theBall;
 
-    public GameSimulator(Level level, BiConsumer<Boolean, Double> playEndCallback) {
+    /**
+     * Creates a new simulator for the given level. 
+     * @param graphs the function storage
+     * @param playEndCallback called when the game ends
+     */
+    public GameSimulator(Level level, GameEndCallback playEndCallback) {
         this.graphs = new FunctionStorage();
-        this.startTimeMs = 0.0;
+        this.startTimeSeconds = 0.0;
         this.timeOnLastUpdate = 0.0;
         this.isPlaying = false;
         this.level = level;
@@ -64,22 +105,33 @@ public final class GameSimulator {
         this.playEndCallback = playEndCallback;
     }
 
+    /**
+     * Starts or stops the simulation. The simulation is reset each time this is called.
+     */
     public void togglePlaying() {
         this.isPlaying = !this.isPlaying;
         if (this.isPlaying) {
-            this.startTimeMs = System.nanoTime() / 1_000_000.0;
+            this.startTimeSeconds = System.nanoTime() / 1_000_000_000.0;
             this.timeOnLastUpdate = 0.0;
         }
         this.theBall.reset(this.level);
     }
 
-    public double getPlayingTimeMs() {
+    /**
+     * Returns the time the simulation has been running, or 0.0 if the simulation is not running.
+     * @return the time in seconds
+     */
+    public double getPlayingTimeSeconds() {
         if (!this.isPlaying) {
             return 0.0;
         }
-        return System.nanoTime() / 1_000_000.0 - this.startTimeMs;
+        return System.nanoTime() / 1_000_000_000.0 - this.startTimeSeconds;
     }
 
+    /**
+     * Returns the ball. Never null, even if the simulation is not active.
+     * @return the ball
+     */
     public Ball getBall() {
         return theBall;
     }
@@ -88,21 +140,38 @@ public final class GameSimulator {
         return this.level;
     }
 
+    /**
+     * Adds a graph to the simulation.
+     * @param graph the graph to add
+     * @see {@link rollingball.game.FunctionStorage#addGraph(Graph)}
+     */
     public Graph addGraph(Function fn) {
         return graphs.addGraph(fn);
     }
 
+    /**
+     * Removes a graph from the simulation.
+     * @param graph the graph to remove
+     * @see {@link rollingball.game.FunctionStorage#removeGraph()}
+     */
     public void removeGraph(Graph graph) {
         graphs.removeGraph(graph);
     }
 
+    /**
+     * Returns the list of graphs currently in use.
+     * @see {@link rollingball.game.FunctionStorage#getGraphs()}
+     */
     public List<Graph> getGraphs() {
         return graphs.getGraphs();
     }
 
+    /**
+     * Advances the simulation by one simulation tick.
+     */
     public void update() {
         if (this.isPlaying) {
-            var timeSeconds = (System.nanoTime() / 1_000_000.0 - this.startTimeMs) / 1000.0;
+            var timeSeconds = System.nanoTime() / 1_000_000_000.0 - this.startTimeSeconds;
             var deltaTime = timeSeconds - this.timeOnLastUpdate;
 
             this.level.onUpdate(timeSeconds, deltaTime);
@@ -110,10 +179,10 @@ public final class GameSimulator {
             updateBallPos(timeSeconds, deltaTime);
             if (checkShouldDie()) {
                 togglePlaying();
-                playEndCallback.accept(false, timeSeconds);
+                playEndCallback.onGameEnd(false, timeSeconds);
             } else if (checkIsTouchingFlag()) {
                 togglePlaying();
-                playEndCallback.accept(true, timeSeconds);
+                playEndCallback.onGameEnd(true, timeSeconds);
             }
 
             this.timeOnLastUpdate = timeSeconds;
@@ -148,13 +217,15 @@ public final class GameSimulator {
 
         Graph curve = null;
         for (var graph : getGraphs()) {
+            var fn = graph.geFunction();
+
             ctx.x = theBall.x;
-            var y = graph.fn.eval(ctx);
-            if (Double.isNaN(y) || y - 0.005 > theBall.y || !graph.fn.canEval(ctx)) {
+            var y = fn.eval(ctx);
+            if (Double.isNaN(y) || y - 0.005 > theBall.y || !fn.canEval(ctx)) {
                 continue;
             }
 
-            var adjustedY = GoldenSectionSearch.computeBallYOnCurve(graph.fn, ctx, theBall.x);
+            var adjustedY = GoldenSectionSearch.computeBallYOnCurve(fn, ctx, theBall.x);
             if (nextY < adjustedY) {
                 nextY = adjustedY;
                 curve = graph;
@@ -193,8 +264,8 @@ public final class GameSimulator {
 
     private static double computeApproxCurveDerivative(Graph graph, double x, EvalContext ctx) {
         var dx = 0.01;
-        var y1 = graph.fn.evalAt(x - dx / 2.0, ctx);
-        var y2 = graph.fn.evalAt(x + dx / 2.0, ctx);
+        var y1 = graph.geFunction().evalAt(x - dx / 2.0, ctx);
+        var y2 = graph.geFunction().evalAt(x + dx / 2.0, ctx);
         return (y2 - y1) / dx;
     }
 }

@@ -7,29 +7,53 @@ import java.util.List;
 import javafx.scene.paint.Color;
 import rollingball.functions.Function;
 
+/**
+ * A container for the functions entered by the user.
+ * FunctionStorage is not permanent, and is created
+ * separately for each level.
+ */
 public final class FunctionStorage {
+    /**
+     * Represents a single function. Each function has a different color and id.
+     */
     public static final class Graph {
-        public Function fn;
-        public final Color color;
+        private Function fn;
+        private final Color color;
 
         private final int id;
 
+        /**
+         * Creates a new graph with the given function and color.
+         * @param id an identifier for the graph
+         * @param fn the function
+         * @param color the color of the graph
+         */
         public Graph(int id, Function fn, Color color) {
             this.id = id;
             this.fn = fn;
             this.color = color;
         }
 
+        public Function geFunction() {
+            return fn;
+        }
+
+        public Color getColor() {
+            return color;
+        }
+
+        /**
+         * Replaces the function in the graph without affecting the id or color.
+         * Intended for permitting the editability of already-entered functions.
+         * @param fn the new function
+         */
         public void setFunction(Function fn) {
             this.fn = fn;
         }
 
         @Override
         public boolean equals(Object obj) {
-            if (obj instanceof Graph graph) {
-                return this.id == graph.id;
-            }
-            return false;
+            return obj instanceof Graph graph && graph.id == this.id;
         }
     }
 
@@ -38,17 +62,43 @@ public final class FunctionStorage {
     private final List<Integer> recycledIds;
     private int graphId = 0;
 
+    /**
+     * Creates an empty FunctionStorage.
+     */
     public FunctionStorage() {
         this.graphs = new ArrayList<>();
         this.recycledIds = new ArrayList<>();
     }
 
+    /**
+     * Adds a new graph to the storage.
+     * @param fn the function
+     * @return the graph
+     */
     public Graph addGraph(Function expr) {
         var id = computeNewGraphId();
         var color = computeColorFor(id);
         var graph = new Graph(id, expr, color);
         graphs.add(graph);
         return graph;
+    }
+
+    /**
+     * Removes the given graph from the storage.
+     * @param graph the graph to remove
+     */
+    public void removeGraph(Graph graph) {
+        if (graphs.remove(graph)) {
+            recycledIds.add(graph.id);
+        }
+    }
+
+    /**
+     * Returns a list of graphs stored in this storage.
+     * @return an immutable view of the graphs
+     */
+    public List<Graph> getGraphs() {
+        return Collections.unmodifiableList(graphs);
     }
 
     private int computeNewGraphId() {
@@ -67,16 +117,6 @@ public final class FunctionStorage {
 
         // Generate a random color and hope it's not too close to any other colors!
         return Color.hsb(Math.random() * 360.0, 1.0, 0.85);
-    }
-
-    public void removeGraph(Graph graph) {
-        if (graphs.remove(graph)) {
-            recycledIds.add(graph.id);
-        }
-    }
-
-    public List<Graph> getGraphs() {
-        return Collections.unmodifiableList(graphs);
     }
 
     // From https://stackoverflow.com/a/20298027, credit to Tatarize

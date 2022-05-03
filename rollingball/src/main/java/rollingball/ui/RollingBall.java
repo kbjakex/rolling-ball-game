@@ -14,7 +14,6 @@ import rollingball.game.LevelBlueprint;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -23,9 +22,15 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.geometry.*;
 
+/**
+ * The main class for the UI.
+ */
 public final class RollingBall extends Application {
     private UserProgressDao progressDao;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void init() throws Exception {
         loadOrCreateSaveFile();
@@ -40,6 +45,9 @@ public final class RollingBall extends Application {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void start(Stage primaryStage) {
         primaryStage.setTitle("Rolling Ball Game");
@@ -121,7 +129,6 @@ public final class RollingBall extends Application {
         var tint = new Image(Main.class.getClassLoader().getResourceAsStream("tint.png"));
 
         var completed = progressDao.getLevelCompletions();
-        System.out.println("Found " + completed.size() + " completed levels");
         for (var level : LevelBlueprint.values()) {
             var levelPane = new BorderPane();
 
@@ -244,10 +251,12 @@ public final class RollingBall extends Application {
         return label;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void stop() throws Exception {
         this.progressDao.flushChanges();
-        System.out.println("Saving progress...");
     }
 
     public static void main(String[] args) {

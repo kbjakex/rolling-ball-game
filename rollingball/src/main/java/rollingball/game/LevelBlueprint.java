@@ -8,6 +8,12 @@ import java.util.Optional;
 import rollingball.game.Level.XY;
 import rollingball.game.Obstacles.Spike;
 
+/**
+ * Contains the list of levels defined for the game. 
+ * Each level has a name and id and contains the logic
+ * for the placement of the obstacles in the level. 
+ * A blueprint may also define the update logic for a level.
+ */
 public enum LevelBlueprint {
     LEVEL_1(0, "Level 1") {
         @Override
@@ -130,20 +136,47 @@ public enum LevelBlueprint {
         this.name = name;
     }
 
+    /**
+     * Returns a human-readable name of the level, intended for display to the user.
+     * @return the name
+     */
     public final String getName() {
         return name;
     }
 
+    /**
+     * Returns an identifier that uniquely identifies the level, intended for saving to a file.
+     * @return the id
+     */
     public final int getId() {
         return id;
     }
 
+    /**
+     * Computes a score for the user based on the time and number of equations used.
+     * @param numEquations the number of equations
+     * @param timeSeconds the completion time in seconds
+     * @return a score in range [0, 1], where 1 is perfect
+     */
     public abstract double computeScorePercentage(int numEquations, double timeSeconds);
 
+    /**
+     * Creates a new instance of the level.
+     * @return the instance
+     */
     public abstract Level createInstance();
 
+    /**
+     * Returns the next level, or null if there is no next level.
+     * @return the next level
+     */
     public abstract LevelBlueprint next();
 
+    /**
+     * Returns the level with the given id, or an empty optional if there is no such level.
+     * @param id the id
+     * @return the level
+     */
     public static Optional<LevelBlueprint> fromId(int id) {
         for (var level : values()) {
             if (level.getId() == id) {

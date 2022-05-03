@@ -2,6 +2,7 @@ package rollingball.dao;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.EOFException;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -73,7 +74,10 @@ public final class FileUserProgressDao implements UserProgressDao {
                 }
                 stream.writeDouble(levelCompletion.scorePercentage());
             }
-            stream.writeInt(nextUncompletedLevel.getId());
+
+            if (nextUncompletedLevel != null) {
+                stream.writeInt(nextUncompletedLevel.getId());
+            }
         }
     }
 
@@ -88,7 +92,13 @@ public final class FileUserProgressDao implements UserProgressDao {
             }
 
             var levelCompletions = readLevelCompletions(stream);
-            var nextUncompleted = LevelBlueprint.fromId(stream.readInt()).orElse(null);
+
+            LevelBlueprint nextUncompleted = null;
+            try {
+                nextUncompleted = LevelBlueprint.fromId(stream.readInt()).orElse(null);
+            } catch (EOFException e) {
+                // No next level
+            }
 
             return new FileUserProgressDao(filePath, levelCompletions, nextUncompleted);
         }
