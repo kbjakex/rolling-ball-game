@@ -11,7 +11,6 @@ import rollingball.Main;
 import rollingball.dao.FileUserProgressDao;
 import rollingball.dao.UserProgressDao;
 import rollingball.game.LevelBlueprint;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -116,7 +115,7 @@ public final class RollingBall extends Application {
         backButton.setOnAction(e -> primaryStage.setScene(sceneHistory.pop().get()));
         HBox.setMargin(backButton, new Insets(10, 10, 10, 10));
 
-        var top = new HBox(createHSpacer(), backButton);
+        var top = new HBox(Spacers.createHSpacer(), backButton);
         top.setPrefHeight(100);
 
         var levels = new HBox();
@@ -204,23 +203,11 @@ public final class RollingBall extends Application {
         subtitle.setAlignment(Pos.CENTER);
         HBox.setMargin(subtitle, new Insets(10, 10, 10, 10));
 
-        layout.getChildren().addAll(top, new HBox(createHSpacer(), new VBox(title, subtitle), createHSpacer()), createVSpacer(), levelView,
-                createVSpacer());
+        layout.getChildren().addAll(top, new HBox(Spacers.createHSpacer(), new VBox(title, subtitle), Spacers.createHSpacer()), Spacers.createVSpacer(), levelView,
+                Spacers.createVSpacer());
         VBox.setMargin(levelView, new Insets(10, 10, 10, 10));
 
         return scene;
-    }
-
-    private Node createHSpacer() {
-        var spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-        return spacer;
-    }
-
-    private Node createVSpacer() {
-        var spacer = new Region();
-        VBox.setVgrow(spacer, Priority.ALWAYS);
-        return spacer;
     }
 
     private Button createButton(String text, double size, double padding) {

@@ -11,7 +11,6 @@ import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -36,7 +35,6 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -387,7 +385,7 @@ public final class GameRenderer {
             primaryStage.setScene(sceneHistory.pop().get());
         });
 
-        var topUi = new HBox(playButtonFrame, createHSpacer(), centerPane, createHSpacer(), backButton);
+        var topUi = new HBox(playButtonFrame, Spacers.createHSpacer(), centerPane, Spacers.createHSpacer(), backButton);
         HBox.setMargin(playButtonFrame, new Insets(10, 26, 10, 10));
         HBox.setMargin(centerPane, new Insets(10, 10, 10, 10));
         HBox.setMargin(backButton, new Insets(10, 10, 10, 10));
@@ -396,7 +394,7 @@ public final class GameRenderer {
         var desiredHeight = 800;
 
         var canvas = new Canvas(desiredWidth, desiredHeight);
-        var canvasPane = new Pane(new StackPane(canvas, new VBox(topUi, createVSpacer())));
+        var canvasPane = new Pane(new StackPane(canvas, new VBox(topUi, Spacers.createVSpacer())));
         canvasPane.heightProperty().addListener((obs, oldVal, newVal) -> canvas.setHeight(newVal.doubleValue()));
 
         var split = new SplitPane(canvasPane, new VBox(equationControls, equationList));
@@ -413,18 +411,6 @@ public final class GameRenderer {
         timeline.play();
 
         return scene;
-    }
-
-    private static Node createHSpacer() {
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-        return spacer;
-    }
-
-    private static Node createVSpacer() {
-        Region spacer = new Region();
-        VBox.setVgrow(spacer, Priority.ALWAYS);
-        return spacer;
     }
 
     private static void addExpression(TextField equationInput, TextField conditionInput, ListView<HBox> equationList,
