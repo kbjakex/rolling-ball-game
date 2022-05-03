@@ -3,7 +3,7 @@ package rollingball.game;
 import rollingball.functions.EvalContext;
 import rollingball.functions.Function;
 
-import static rollingball.game.GameSimulator.BALL_RADIUS;
+import static rollingball.game.Ball.BALL_RADIUS;
 
 /**
 Problem: For the ball to roll on *top* of the curves, simply computing its y (upwards) position as

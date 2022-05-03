@@ -23,44 +23,8 @@ public final class GameSimulator {
      * Total height is therefore technically twice this.
      */
     public static final int LEVEL_HEIGHT = 8; // -8..8
-    /**
-     * The radius of the ball in level coordinates.
-     */
-    public static final double BALL_RADIUS = 0.4;
 
-    /**
-     * The ball itself. Mostly an (x,y) pair.
-     */
-    public static final class Ball {
-        private double x;
-        private double y;
-
-        private Graph collidingCurve;
-        private double lastCollisionTimestamp;
-
-        private Ball(Level level) {
-            reset(level);
-        }
-
-        public double getX() {
-            return x;
-        }
-
-        public double getY() {
-            return y;
-        }
-
-        /**
-         * Resets the ball to the start position of the level.
-         * @param level the level
-         */
-        public void reset(Level level) {
-            var start = level.getStart();
-            this.x = start.x();
-            this.y = start.y();
-            this.lastCollisionTimestamp = 0.0;
-        }
-    }
+    private static final double FLAG_SIZE = 1.0;
 
     /**
      * A callback for communicating when the simulation stops for any reason.
@@ -204,15 +168,15 @@ public final class GameSimulator {
 
     private boolean checkIsTouchingFlag() {
         var end = level.getEnd();
-        var dx = theBall.x - end.x();
-        var dy = theBall.y - end.y();
-        return dx * dx + dy * dy < 0.25;
+        var r = Ball.BALL_RADIUS;
+        return end.x() <= theBall.x + r && theBall.x - r <= end.x() + FLAG_SIZE &&
+                end.y() <= theBall.y + r && theBall.y - r <= end.y() + FLAG_SIZE;
     }
 
     private void updateBallPos(double time, double deltaTime) {
         var ctx = new EvalContext(time);
 
-        var nextY = theBall.y - computeGravity(time);
+        var nextY = theBall.y - computeGravity(time) - Ball.BALL_RADIUS;
         var nextX = theBall.x + computeHorizontalSpeed(deltaTime, ctx);
 
         Graph curve = null;
@@ -233,7 +197,7 @@ public final class GameSimulator {
             }
         }
         theBall.x = nextX;
-        theBall.y = nextY;
+        theBall.y = nextY + Ball.BALL_RADIUS;
         theBall.collidingCurve = curve;
     }
 

@@ -69,6 +69,9 @@ public class Level {
      * @param deltaTime time, in seconds, since the last simulation update
      */
     public void onUpdate(double timeSeconds, double deltaTime) {
+        for (var obstacle : obstacles) {
+            obstacle.update(timeSeconds);
+        }
     }
 
     /**

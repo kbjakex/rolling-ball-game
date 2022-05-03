@@ -49,10 +49,12 @@ import rollingball.functions.EvalContext;
 import rollingball.functions.Function;
 import rollingball.functions.FunctionParser;
 import rollingball.functions.ParserException;
+import rollingball.game.Ball;
 import rollingball.game.GameSimulator;
 import rollingball.game.Level;
 import rollingball.game.FunctionStorage.Graph;
 import rollingball.game.Obstacles.Spike;
+import rollingball.game.Obstacles.SpikeWheel;
 
 /**
  * A renderer for the game state. This class contains no game logic, and is
@@ -118,10 +120,10 @@ public final class GameRenderer {
         graphics.setStroke(Color.BLACK);
         graphics.setFill(Color.GRAY);
         var ball = state.getBall();
-        var diameter = GameSimulator.BALL_RADIUS * PX_PER_GRAPH_AREA_UNIT * 2.0;
+        var diameter = Ball.BALL_RADIUS * PX_PER_GRAPH_AREA_UNIT * 2.0;
         graphics.fillOval(
                 ball.getX() * PX_PER_GRAPH_AREA_UNIT - diameter / 2.0,
-                -ball.getY() * PX_PER_GRAPH_AREA_UNIT - diameter,
+                -ball.getY() * PX_PER_GRAPH_AREA_UNIT - diameter / 2.0,
                 diameter, diameter);
     }
 
@@ -133,15 +135,24 @@ public final class GameRenderer {
         for (var obstacle : state.getLevel().getObstacles()) {
             var random = ++index * 3; // poor way to get per-obstacle "random" value...
             if (obstacle instanceof Spike s) {
-                for (var i = 0; i < 5; ++i) {
-                    var angle = Math.PI * 2 * i / 5 + Math.sin(System.currentTimeMillis() * 0.002 + random) * 0.1;
-                    var x = s.x() * PX_PER_GRAPH_AREA_UNIT;
-                    var y = s.y() * PX_PER_GRAPH_AREA_UNIT;
-                    var dx = Math.cos(angle) * 0.35 * PX_PER_GRAPH_AREA_UNIT;
-                    var dy = Math.sin(angle) * 0.35 * PX_PER_GRAPH_AREA_UNIT;
-                    graphics.strokeLine(x - dx, -y - dy, x + dx, -y + dy);
+                drawSpike(s, random);
+            } else if (obstacle instanceof SpikeWheel wheel) {
+                for (var spike : wheel.getSpikes()) {
+                    drawSpike(spike, random);
                 }
             }
+        }
+    }
+
+    private void drawSpike(Spike s, int random) {
+        var x = s.getX() * PX_PER_GRAPH_AREA_UNIT;
+        var y = s.getY() * PX_PER_GRAPH_AREA_UNIT;
+        var angleOffset = Math.sin(System.currentTimeMillis() * 0.002 + random) * 0.1;
+        for (var i = 0; i < 5; ++i) {
+            var angle = Math.PI * 2 * i / 5 + angleOffset;
+            var dx = Math.cos(angle) * Spike.RADIUS * PX_PER_GRAPH_AREA_UNIT;
+            var dy = Math.sin(angle) * Spike.RADIUS * PX_PER_GRAPH_AREA_UNIT;
+            graphics.strokeLine(x - dx, -y - dy, x + dx, -y + dy);
         }
     }
 
@@ -150,6 +161,9 @@ public final class GameRenderer {
 
         graphics.setLineWidth(2.0);
         for (var graph : state.getGraphs()) {
+            if (graph.geFunction() == null) { // User made syntax error while editing
+                continue;
+            }
             renderGraph(graph, evalCtx);
         }
     }

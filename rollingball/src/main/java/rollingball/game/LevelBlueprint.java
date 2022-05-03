@@ -1,9 +1,11 @@
 package rollingball.game;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import rollingball.game.Level.XY;
 import rollingball.game.Obstacles.Spike;
@@ -34,31 +36,10 @@ public enum LevelBlueprint {
         @Override
         public double computeScorePercentage(int numEquations, double timeSeconds) {
             // First level: should be a single straight line, which takes about 9 seconds to travel
-            return 1.0 - (numEquations-1) / 3.0 - Math.max(0, timeSeconds - 9) / 3.0;
+            return score(numEquations, timeSeconds, 1, 9.0);
         }
     },
     LEVEL_2(1, "Level 2") {
-        @Override
-        public Level createInstance() {
-            var obstacles = new ArrayList<Obstacle>();
-            for (int i = 0; i < 8; i++) {
-                obstacles.add(new Spike(0, i));
-            }
-            return new Level(this, XY.of(-6, 3), XY.of(6, 3), obstacles);
-        }
-
-        @Override
-        public LevelBlueprint next() {
-            return LevelBlueprint.LEVEL_3;
-        }
-
-        @Override
-        public double computeScorePercentage(int numEquations, double timeSeconds) {
-            // Target time 9.1 seconds, single equation
-            return 1.0 - (numEquations-1) / 3.0 - Math.max(0, timeSeconds - 9.1) / 3.0;
-        }
-    },
-    LEVEL_3(2, "Level 3") {
         @Override
         public Level createInstance() {
             var obstacles = new ArrayList<Obstacle>();
@@ -73,30 +54,58 @@ public enum LevelBlueprint {
 
         @Override
         public LevelBlueprint next() {
-            return LevelBlueprint.LEVEL_4;
+            return LevelBlueprint.LEVEL_3;
         }
 
         @Override
         public double computeScorePercentage(int numEquations, double timeSeconds) {
             // Target time 12.6 seconds, single equation
-            return 1.0 - (numEquations-1) / 3.0 - Math.max(0, timeSeconds - 12.6) / 3.0;
+            return score(numEquations, timeSeconds, 1, 12.6);
+        }
+    },
+    LEVEL_3(2, "Level 3") {
+        @Override
+        public Level createInstance() {
+            var obstacles = new ArrayList<Obstacle>();
+            for (int i = 0; i < 8; i++) {
+                obstacles.add(new Spike(0, i));
+            }
+            for (int i = 0; i < 5; ++i) {
+                obstacles.add(new Spike(-3-i, 0));
+                obstacles.add(new Spike(3+i, 0));
+            }
+            return new Level(this, XY.of(-6, 3), XY.of(6, 3), obstacles);
+        }
+
+        @Override
+        public LevelBlueprint next() {
+            return LevelBlueprint.LEVEL_4;
+        }
+
+        @Override
+        public double computeScorePercentage(int numEquations, double timeSeconds) {
+            // Target time 9.4 seconds, single equation
+            // Example solution: -2.5*e^(-x^2 / (2*1.5^2))+1+max(0,x/4)
+            return score(numEquations, timeSeconds, 1, 9.4);
         }
     },
     LEVEL_4(3, "Level 4") {
         static final class Level4 extends Level {
-            private final List<Obstacle> basePositions;
+            private final List<XY> basePositions;
 
-            Level4(LevelBlueprint next, XY start, XY end, List<Obstacle> spikes) {
-                super(next, start, end, spikes);
-                this.basePositions = new ArrayList<>(spikes);
+            Level4(LevelBlueprint level, XY start, XY end, List<Obstacle> spikes) {
+                super(level, start, end, spikes);
+                this.basePositions = spikes.stream().map(s -> (Spike)s).map(s -> XY.of(s.getX(), s.getY())).collect(Collectors.toList());
             }
 
             @Override
             public void onUpdate(double timeSeconds, double deltaTime) {
                 var yOff = Math.sin(timeSeconds * 0.5) * 1.5;
-                for (var i = 0; i < basePositions.size(); i++) {
-                    var spike = (Spike) basePositions.get(i);
-                    super.obstacles.set(i, new Spike(spike.x(), spike.y() + yOff));
+                for (var i = 0; i < obstacles.size(); i++) {
+                    var spike = (Spike) obstacles.get(i);
+                    var basePos = basePositions.get(i);
+
+                    spike.setPosition(basePos.x(), basePos.y() + yOff);
                 }
             }
         }
@@ -116,7 +125,7 @@ public enum LevelBlueprint {
 
         @Override
         public LevelBlueprint next() {
-            return null;
+            return LevelBlueprint.LEVEL_5;
         }
 
         @Override
@@ -124,7 +133,27 @@ public enum LevelBlueprint {
             // Target time 8.3 seconds, two equations, OR, 9 seconds and 1 equation. Two-equation example solution:
             // -cos(x/1.2+.5)*0.8+0.8 | -0.5 < x < 8
             // 0
-            return 1.0 - (numEquations-2) / 3.0 - Math.max(0, timeSeconds - 8.3) / 3.0;
+            return score(numEquations, timeSeconds, 2, 8.3);
+        }
+    },
+    LEVEL_5(4, "Level 5") {
+        @Override
+        public Level createInstance() {
+            var wheel = new Obstacles.SpikeWheel(0.0, 0.0, 5, 5, -0.8);
+
+            return new Level(this, XY.of(-6, 0), XY.of(6, 0), Arrays.asList(wheel));
+        }
+
+        @Override
+        public LevelBlueprint next() {
+            return null; // last level
+        }
+
+        @Override
+        public double computeScorePercentage(int numEquations, double timeSeconds) {
+            // Target time 7.9 seconds, one equation. Example solution:
+            // 4sin(t/2)+sin(t/4)+sin(t/6)
+            return score(numEquations, timeSeconds, 1, 7.9);
         }
     };
 
@@ -184,5 +213,9 @@ public enum LevelBlueprint {
             }
         }
         return Optional.empty();
+    }
+
+    private static double score(int numEquations, double timeSeconds, int targetEquations, double targetTime) {
+        return 1.0 - (numEquations-targetEquations) / 3.0 - Math.max(0, timeSeconds - targetTime) / 3.0;
     }
 }
