@@ -33,3 +33,4 @@
 - Kaikki 5 kenttää ovat nyt pelissä ja kenttien vaikeustaso on nyt riittävä.
 - Javadoc-dokumentaatio on aloitettu; `game`- ja `ui`-kansiot ovat täysin dokumentoituja.
 - Peli ei enää käytä oikeaa aikaa ajan mittaukseen, minkä ansiosta peli on nyt reilu myös hitailla koneilla, deterministinen ja yksikkötestattava. Jokainen kenttä onkin nyt yksikkötestattu malliratkaisun avulla.
+- Lisättiin käyttöohje
