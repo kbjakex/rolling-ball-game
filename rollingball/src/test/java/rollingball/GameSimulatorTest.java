@@ -35,6 +35,20 @@ public class GameSimulatorTest {
         testLevel(LevelBlueprint.LEVEL_5, "4sin(t/2)+sin(t/4)+sin(t/6)", 7.9);
     }
 
+    @Test
+    public void testNotEveryInputWinsTheGame() {
+        var finished = new boolean[1];
+        var simulation = new GameSimulator(LevelBlueprint.LEVEL_1.createInstance(), (won, time) -> finished[0] = won);
+        simulation.addGraph(FunctionParser.parse("2x", ""));
+
+        simulation.togglePlaying();
+        while (simulation.isPlaying()) {
+            simulation.update();
+        }
+
+        assertEquals(false, finished[0]);
+    }
+
     private void testLevel(LevelBlueprint blueprint, String expression, double targetTime) {
         var finished = new boolean[1];
         var simulationTime = new double[1];
