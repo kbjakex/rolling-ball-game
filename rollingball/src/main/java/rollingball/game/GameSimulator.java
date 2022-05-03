@@ -71,7 +71,15 @@ public final class GameSimulator {
      */
     public void togglePlaying() {
         this.isPlaying = !this.isPlaying;
+        this.simulationTimeSeconds = 0.0;
         this.theBall.reset(this.level);
+    }
+
+    /**
+     * @return true if the simulation is currently running
+     */
+    public boolean isPlaying() {
+        return this.isPlaying;
     }
 
     /**
@@ -147,7 +155,7 @@ public final class GameSimulator {
     }
 
     private boolean checkShouldDie() {
-        if (theBall.y < -LEVEL_HEIGHT - 1 || theBall.y > LEVEL_HEIGHT + 1) {
+        if (theBall.y < -LEVEL_HEIGHT - 1 || theBall.y > LEVEL_HEIGHT + 1 || theBall.x > LEVEL_WIDTH + 1) {
             return true;
         }
 

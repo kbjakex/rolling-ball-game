@@ -35,7 +35,8 @@ public enum LevelBlueprint {
 
         @Override
         public double computeScorePercentage(int numEquations, double timeSeconds) {
-            // First level: should be a single straight line, which takes about 9 seconds to travel
+            // Takes about 9 seconds, single equation
+            // Example solution: 1/3x+1.5
             return score(numEquations, timeSeconds, 1, 9.0);
         }
     },
@@ -60,6 +61,7 @@ public enum LevelBlueprint {
         @Override
         public double computeScorePercentage(int numEquations, double timeSeconds) {
             // Target time 12.6 seconds, single equation
+            // Example solution: -cos(x/1.2)*2-1.4
             return score(numEquations, timeSeconds, 1, 12.6);
         }
     },
@@ -130,9 +132,8 @@ public enum LevelBlueprint {
 
         @Override
         public double computeScorePercentage(int numEquations, double timeSeconds) {
-            // Target time 8.3 seconds, two equations, OR, 9 seconds and 1 equation. Two-equation example solution:
-            // -cos(x/1.2+.5)*0.8+0.8 | -0.5 < x < 8
-            // 0
+            // Target time 8.25 seconds, single equation
+            // Example solution: sin(t/2)+max(0, 1.7*sin(x/2.15))
             return score(numEquations, timeSeconds, 2, 8.3);
         }
     },
