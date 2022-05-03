@@ -2,7 +2,7 @@
 
 Sovellus on peli, jossa ohjataan kaksiulotteisessa avaruudessa oikealle kulkeva pallo lähdöstä maaliin kirjoittamalla yhtälöitä, joilla määritellään pallolle pintoja, joiden päällä pyöriä.
 
-Meneillään on viikko 6. Peli on yhtä kenttää ja hiomista vaille valmis. Kaikki suunnitellut ominaisuudet toimivat.
+Meneillään on viikko 6. Peli on mahdollista hiomista vaille valmis. Kaikki vaatimusmäärittelyn kohdat ovat valmiita.
 
 ## Dokumentaatio
 
@@ -12,9 +12,12 @@ Meneillään on viikko 6. Peli on yhtä kenttää ja hiomista vaille valmis. Kai
 
 [Arkkitehtuurikuvaus](https://github.com/kbjakex/ot-harjoitystyo/blob/main/dokumentaatio/arkitehtuuri.md)
 
+[Käyttöohje](https://github.com/kbjakex/ot-harjoitystyo/blob/main/dokumentaatio/kayttoohje.md)
+
 ## Releaset
 
 [Viikko 5](https://github.com/kbjakex/ot-harjoitystyo/releases/tag/viikko5)
+[Viikko 6](https://github.com/kbjakex/ot-harjoitystyo/releases/tag/viikko6)
 
 ### Testaus
 
@@ -47,6 +50,13 @@ ja ohjelman voi käynnistää suoraan komentoriviltä komennolla
 ```console
 mvn compile exec:java -Dexec.mainClass=rollingball.ui.RollingBall
 ```
+
+## Javadoc
+Javadocin voi generoida komennolla
+```console
+mvn javadoc:javadoc
+```
+jonka jälkeen dokumentaatio löytyy polusta `target/site/apidocs/index.html`.
 
 ## Javan versio
 
