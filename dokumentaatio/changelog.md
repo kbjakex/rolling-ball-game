@@ -23,3 +23,10 @@
 - Huoliteltiin käyttöliittymän ulkoasua päävalikossa ja pelinäkymässä
 - Lisättiin start/stop toiminnallisuus
 - Lisättiin yhtälöiden rajaukset (esim. `sin(t) < x < 8`)
+
+## Viikko 6
+
+- Pelitilanne tallentuu nyt tiedostoon `rollingballdata.dat`, ja peliä voi sulkemisen jälken jatkaa siitä, mihin jäi
+- Kenttävalikko on hiottu jotakuinkin vastaamaan suunnitelmaa graafisesti
+- Kentän läpäisystä saa pisteitä, joiden perusteella määräytyy tähtien määrä
+- Kaikki kentät eivät enää ole automaattisesti auki, vaan lukitun kentän saa auki ratkaisemalla edellisen kentän
