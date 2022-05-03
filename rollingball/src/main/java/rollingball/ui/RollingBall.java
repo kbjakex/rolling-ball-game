@@ -3,22 +3,27 @@ package rollingball.ui;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Stack;
+import java.util.function.Supplier;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
+import rollingball.Main;
 import rollingball.dao.FileUserProgressDao;
 import rollingball.dao.UserProgressDao;
 import rollingball.game.LevelBlueprint;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.effect.ColorAdjust;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.geometry.*;
 
-public class RollingBall extends Application {
-
+public final class RollingBall extends Application {
     private UserProgressDao progressDao;
 
     @Override
@@ -48,27 +53,27 @@ public class RollingBall extends Application {
         var mainMenu = new VBox();
         var scene = new Scene(mainMenu, 800, 800);
 
-        var sceneStack = new Stack<Scene>();
+        var sceneStack = new Stack<Supplier<Scene>>();
 
         var titleLabel = createLabel("Rolling Ball Game", 50, 150);
         titleLabel.setUnderline(true);
 
         var startButton = createButton("Start", 30, 20);
         startButton.setOnAction(e -> {
-            sceneStack.push(scene);
+            sceneStack.push(() -> scene);
 
             var nextLevel = progressDao.getNextUncompletedLevel();
             if (nextLevel == null) { // game completed; start from level 1 again
                 nextLevel = LevelBlueprint.LEVEL_1;
             }
             primaryStage
-                    .setScene(GameRenderer.createGameScene(primaryStage, sceneStack, nextLevel.createInstance()));
+                    .setScene(GameRenderer.createGameScene(primaryStage, sceneStack, progressDao, nextLevel.createInstance()));
         });
         startButton.requestFocus();
 
         var levelsButton = createButton("Level Select", 30, 20);
         levelsButton.setOnAction(e -> {
-            sceneStack.push(scene);
+            sceneStack.push(() -> scene);
             primaryStage.setScene(createLevelSelectScene(primaryStage, sceneStack));
         });
 
@@ -87,7 +92,7 @@ public class RollingBall extends Application {
         return scene;
     }
 
-    private Scene createLevelSelectScene(Stage primaryStage, Stack<Scene> sceneHistory) {
+    private Scene createLevelSelectScene(Stage primaryStage, Stack<Supplier<Scene>> sceneHistory) {
         var layout = new VBox();
         layout.setPrefSize(800, 800);
         layout.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
@@ -100,7 +105,7 @@ public class RollingBall extends Application {
         backButton.setBackground(new Background(new BackgroundFill(Color.WHITE, new CornerRadii(5.0), Insets.EMPTY)));
         backButton.setBorder(new Border(new BorderStroke(Color.LIGHTGRAY, BorderStrokeStyle.SOLID, new CornerRadii(5.0),
                 new BorderWidths(2.0))));
-        backButton.setOnAction(e -> primaryStage.setScene(sceneHistory.pop()));
+        backButton.setOnAction(e -> primaryStage.setScene(sceneHistory.pop().get()));
         HBox.setMargin(backButton, new Insets(10, 10, 10, 10));
 
         var top = new HBox(createHSpacer(), backButton);
@@ -110,21 +115,73 @@ public class RollingBall extends Application {
         levels.setPadding(new Insets(50, 50, 50, 50));
         levels.setFocusTraversable(false);
 
-        for (var level : LevelBlueprint.values()) {
-            var levelButton = new Button(level.getName());
-            levelButton.setPrefSize(250, 250);
-            levelButton.setFont(new Font("Arial", 35));
-            HBox.setMargin(levelButton, new Insets(10, 50, 10, 0));
+        var lockImage = new Image(Main.class.getClassLoader().getResourceAsStream("lock.png"));
+        var starImage = new Image(Main.class.getClassLoader().getResourceAsStream("star.png"));
+        var noStarImage = new Image(Main.class.getClassLoader().getResourceAsStream("nostar.png"));
+        var tint = new Image(Main.class.getClassLoader().getResourceAsStream("tint.png"));
 
-            levelButton.setOnAction(e -> {
-                sceneHistory.add(scene);
-                primaryStage.setScene(GameRenderer.createGameScene(primaryStage, sceneHistory, level.createInstance()));
+        var completed = progressDao.getLevelCompletions();
+        System.out.println("Found " + completed.size() + " completed levels");
+        for (var level : LevelBlueprint.values()) {
+            var levelPane = new BorderPane();
+
+            var levelImg = new ImageView(new Image(Main.class.getClassLoader().getResourceAsStream(level.ordinal() + ".png")));
+
+            var levelButton = levelImg;
+            levelButton.setFitWidth(250);
+            levelButton.setFitHeight(250);
+
+            var buttonStack = new StackPane(levelButton);
+            
+            var completion = completed.stream().filter(c -> c.level() == level).findFirst().orElse(null);
+            var starCount = completion == null ? 0 : (int)(completion.scorePercentage() * 3);
+            var stars = new HBox();
+            for (int i = 0; i < 3; i++) {
+                var star = new ImageView(i < starCount ? starImage : noStarImage);
+                star.setFitWidth(44);
+                star.setFitHeight(44);
+                stars.getChildren().add(star);
+                HBox.setMargin(star, new Insets(0.0, 0.0, i == 1 ? 24.0 : 0.0, 0.0));
+            }
+            stars.setAlignment(Pos.CENTER);
+            stars.setSpacing(10);
+            stars.setVisible(false);
+            
+            levelPane.setTop(stars);
+
+            if (completion == null && progressDao.getNextUncompletedLevel() != level) {
+                levelButton.setDisable(true);
+
+                var lockView = new ImageView(lockImage);
+                lockView.setFitWidth(100);
+                lockView.setFitHeight(100);
+                buttonStack.getChildren().addAll(new ImageView(tint), lockView);
+            } else if (progressDao.getNextUncompletedLevel() != level) {
+                stars.setVisible(true);
+            } else {
+                buttonStack.setBorder(new Border(new BorderStroke(Color.GRAY, BorderStrokeStyle.SOLID, new CornerRadii(2.0),
+                        new BorderWidths(5.0))));
+                levelButton.requestFocus();
+            }
+
+            levelPane.setCenter(buttonStack);
+
+            var title = new Label(level.getName());
+            title.setFont(new Font("Arial", 23));
+            BorderPane.setAlignment(title, Pos.CENTER);
+            BorderPane.setMargin(title, new Insets(10));
+            levelPane.setBottom(title);
+            HBox.setMargin(levelPane, new Insets(10, 50, 10, 0));
+            
+            levelButton.addEventHandler(MouseEvent.MOUSE_CLICKED, evt -> {
+                sceneHistory.add(() -> createLevelSelectScene(primaryStage, sceneHistory));
+                primaryStage.setScene(GameRenderer.createGameScene(primaryStage, sceneHistory, progressDao, level.createInstance()));                
             });
 
-            levels.getChildren().add(levelButton);
+            levels.getChildren().add(levelPane);
         }
         var levelView = new ScrollPane(levels);
-        levelView.setPrefHeight(400);
+        levelView.setPrefHeight(600);
         levelView.setBorder(Border.EMPTY);
         levelView.setFocusTraversable(false);
 
@@ -134,7 +191,13 @@ public class RollingBall extends Application {
         title.setAlignment(Pos.CENTER);
         HBox.setMargin(title, new Insets(10, 10, 10, 10));
 
-        layout.getChildren().addAll(top, new HBox(createHSpacer(), title, createHSpacer()), createVSpacer(), levelView,
+        var subtitle = new Label("Completed " + progressDao.getLevelCompletions().size() + "/" + LevelBlueprint.values().length);
+        subtitle.setFont(new Font("Arial", 26));
+        subtitle.setTextFill(Color.BLACK);
+        subtitle.setAlignment(Pos.CENTER);
+        HBox.setMargin(subtitle, new Insets(10, 10, 10, 10));
+
+        layout.getChildren().addAll(top, new HBox(createHSpacer(), new VBox(title, subtitle), createHSpacer()), createVSpacer(), levelView,
                 createVSpacer());
         VBox.setMargin(levelView, new Insets(10, 10, 10, 10));
 
@@ -184,6 +247,7 @@ public class RollingBall extends Application {
     @Override
     public void stop() throws Exception {
         this.progressDao.flushChanges();
+        System.out.println("Saving progress...");
     }
 
     public static void main(String[] args) {

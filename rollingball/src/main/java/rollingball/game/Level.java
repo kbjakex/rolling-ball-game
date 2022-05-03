@@ -32,8 +32,8 @@ public class Level {
         this.obstacles = obstacles;
     }
 
-    public String getName() {
-        return levelBlueprint.getName();
+    public LevelBlueprint getBlueprint() {
+        return levelBlueprint;
     }
 
     public XY getStart() {

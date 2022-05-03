@@ -31,11 +31,11 @@ public final class FileUserProgressDao implements UserProgressDao {
         var it = levelCompletions.listIterator();
         while (it.hasNext()) {
             var levelCompletion = it.next();
-            if (levelCompletion.level != levelCompletionInfo.level) {
+            if (levelCompletion.level()!= levelCompletionInfo.level()) {
                 continue;
             }
 
-            if (levelCompletion.scorePercentage < levelCompletionInfo.scorePercentage) {
+            if (levelCompletion.scorePercentage() < levelCompletionInfo.scorePercentage()) {
                 it.set(levelCompletionInfo); // replace if better than the previous solution
             }
             return;
@@ -44,7 +44,7 @@ public final class FileUserProgressDao implements UserProgressDao {
         // Otherwise, add
         levelCompletions.add(levelCompletionInfo);
 
-        if (levelCompletionInfo.level == nextUncompletedLevel) {
+        if (levelCompletionInfo.level()== nextUncompletedLevel) {
             this.nextUncompletedLevel = this.nextUncompletedLevel.next();
         }
     }
@@ -65,12 +65,13 @@ public final class FileUserProgressDao implements UserProgressDao {
             stream.writeInt(HEADER_MAGIC);
             stream.writeInt(levelCompletions.size());
             for (var levelCompletion : levelCompletions) {
-                stream.writeInt(levelCompletion.level.getId());
-                stream.writeInt(levelCompletion.equationsUsed.size());
-                for (var equation : levelCompletion.equationsUsed) {
-                    stream.writeUTF(equation);
+                stream.writeInt(levelCompletion.level().getId());
+                stream.writeInt(levelCompletion.equations().size());
+                for (var equation : levelCompletion.equations()) {
+                    stream.writeUTF(equation.formula());
+                    stream.writeUTF(equation.condition());
                 }
-                stream.writeDouble(levelCompletion.scorePercentage);
+                stream.writeDouble(levelCompletion.scorePercentage());
             }
             stream.writeInt(nextUncompletedLevel.getId());
         }
@@ -87,7 +88,7 @@ public final class FileUserProgressDao implements UserProgressDao {
             }
 
             var levelCompletions = readLevelCompletions(stream);
-            var nextUncompleted = LevelBlueprint.fromId(stream.readInt());
+            var nextUncompleted = LevelBlueprint.fromId(stream.readInt()).orElse(null);
 
             return new FileUserProgressDao(filePath, levelCompletions, nextUncompleted);
         }
@@ -97,11 +98,11 @@ public final class FileUserProgressDao implements UserProgressDao {
         var levelCompletions = new ArrayList<LevelCompletionInfo>();
         var numLevels = stream.readInt();
         for (int i = 0; i < numLevels; i++) {
-            var level = LevelBlueprint.fromId(stream.readInt());
+            var level = LevelBlueprint.fromId(stream.readInt()).get();
             var numEquations = stream.readInt();
-            var equationsUsed = new ArrayList<String>();
+            var equationsUsed = new ArrayList<Equation>();
             for (int j = 0; j < numEquations; j++) {
-                equationsUsed.add(stream.readUTF());
+                equationsUsed.add(new Equation(stream.readUTF(), stream.readUTF()));
             }
             var scorePercentage = stream.readDouble();
             levelCompletions.add(new LevelCompletionInfo(level, equationsUsed, scorePercentage));

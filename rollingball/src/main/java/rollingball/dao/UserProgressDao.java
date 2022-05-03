@@ -5,21 +5,14 @@ import java.util.List;
 import rollingball.game.LevelBlueprint;
 
 public interface UserProgressDao {
-    static final class LevelCompletionInfo {
-        public final LevelBlueprint level;
-        public final List<String> equationsUsed;
-        public final double scorePercentage;
 
-        public LevelCompletionInfo(LevelBlueprint level, List<String> equationsUsed, double scorePercentage) {
-            this.level = level;
-            this.equationsUsed = equationsUsed;
-            this.scorePercentage = scorePercentage;
-        }
+    static final record Equation(String formula, String condition) {}
+    static final record LevelCompletionInfo(LevelBlueprint level, List<Equation> equations, double scorePercentage) {
     }
     
     void addLevelCompletion(LevelCompletionInfo levelCompletionInfo);
 
-    default void addLevelCompletion(LevelBlueprint level, List<String> equationsUsed, double scorePercentage) {
+    default void addLevelCompletion(LevelBlueprint level, List<Equation> equationsUsed, double scorePercentage) {
         addLevelCompletion(new LevelCompletionInfo(level, equationsUsed, scorePercentage));
     }
 

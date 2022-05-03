@@ -1,6 +1,7 @@
 package rollingball.game;
 
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import rollingball.functions.EvalContext;
@@ -47,13 +48,13 @@ public final class GameSimulator {
 
     private double startTimeMs;
     private boolean isPlaying;
-    private final Consumer<Boolean> playEndCallback;
+    private final BiConsumer<Boolean, Double> playEndCallback;
 
     private double timeOnLastUpdate;
 
     private Ball theBall;
 
-    public GameSimulator(Level level, Consumer<Boolean> playEndCallback) {
+    public GameSimulator(Level level, BiConsumer<Boolean, Double> playEndCallback) {
         this.graphs = new FunctionStorage();
         this.startTimeMs = 0.0;
         this.timeOnLastUpdate = 0.0;
@@ -109,10 +110,10 @@ public final class GameSimulator {
             updateBallPos(timeSeconds, deltaTime);
             if (checkShouldDie()) {
                 togglePlaying();
-                playEndCallback.accept(false);
+                playEndCallback.accept(false, timeSeconds);
             } else if (checkIsTouchingFlag()) {
                 togglePlaying();
-                playEndCallback.accept(true);
+                playEndCallback.accept(true, timeSeconds);
             }
 
             this.timeOnLastUpdate = timeSeconds;

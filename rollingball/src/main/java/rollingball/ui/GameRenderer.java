@@ -1,6 +1,9 @@
 package rollingball.ui;
 
+import java.util.ArrayList;
 import java.util.Stack;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -42,6 +45,7 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import rollingball.Main;
+import rollingball.dao.UserProgressDao;
 import rollingball.functions.EvalContext;
 import rollingball.functions.Function;
 import rollingball.functions.FunctionParser;
@@ -199,7 +203,7 @@ public final class GameRenderer {
         graphics.strokeLine(0.0, -GRAPH_AREA_HEIGHT_PX, 0.0, GRAPH_AREA_HEIGHT_PX);
     }
 
-    public static Scene createGameScene(Stage primaryStage, Stack<Scene> sceneHistory, Level level) {
+    public static Scene createGameScene(Stage primaryStage, Stack<Supplier<Scene>> sceneHistory, UserProgressDao progressDao, Level level) {
         var equationList = new ListView<HBox>();
         equationList.setFocusTraversable(false);
         equationList.getItems().add(new HBox(new Label(""))); // make ListView render
@@ -253,7 +257,7 @@ public final class GameRenderer {
                 new Background(new BackgroundFill(Color.gray(1.0, 0.7), CornerRadii.EMPTY, Insets.EMPTY)));
         timeArea.setVisible(false);
 
-        var levelLabel = new Label(level.getName());
+        var levelLabel = new Label(level.getBlueprint().getName());
         levelLabel.setFont(new Font("Arial", 24));
         levelLabel.setTextFill(Color.gray(0.3));
 
@@ -270,8 +274,23 @@ public final class GameRenderer {
         playButtonFrame.setBorder(new Border(new BorderStroke(Color.LIGHTGRAY, BorderStrokeStyle.SOLID,
                 new CornerRadii(5.0), new BorderWidths(2.0))));
 
-        var state = new GameSimulator(level, victory -> Platform.runLater(() -> {
+        var state = new GameSimulator(level, (victory, gameTimeSeconds) -> Platform.runLater(() -> {
             if (victory) {
+                var equations = equationList.getItems()
+                    .stream()
+                    .filter(node -> node.getChildren().get(0) instanceof TextField)
+                    .map(node -> {
+                        var equation = ((TextField) node.getChildren().get(0)).getText();
+                        var condition = ((TextField) node.getChildren().get(1)).getText();
+                        return new UserProgressDao.Equation(equation, condition);
+                    })
+                    .filter(eq -> !eq.formula().isEmpty())
+                    .collect(Collectors.toList());
+
+                var scorePercentage = level.getBlueprint().computeScorePercentage(equations.size(), gameTimeSeconds);
+
+                progressDao.addLevelCompletion(level.getBlueprint(), equations, scorePercentage);
+
                 var alert = new Alert(Alert.AlertType.INFORMATION);
                 alert.setTitle("Victory!");
                 alert.setHeaderText("You won!");
@@ -279,9 +298,9 @@ public final class GameRenderer {
 
                 var nextLevel = level.nextLevel();
                 if (nextLevel == null) {
-                    primaryStage.setScene(sceneHistory.pop());
+                    primaryStage.setScene(sceneHistory.pop().get());
                 } else {
-                    var scene = createGameScene(primaryStage, sceneHistory, nextLevel);
+                    var scene = createGameScene(primaryStage, sceneHistory, progressDao, nextLevel);
                     primaryStage.setScene(scene);
                 }
                 return;
@@ -293,6 +312,13 @@ public final class GameRenderer {
         }));
 
         addEquationButton.setOnAction(e -> addExpression(equationInput, conditionInput, equationList, state));
+        progressDao.getLevelCompletions().stream().filter(eq -> eq.level() == level.getBlueprint()).forEach(data -> {
+            for (var equation : data.equations()) {
+                equationInput.setText(equation.formula());
+                conditionInput.setText(equation.condition());
+                addExpression(equationInput, conditionInput, equationList, state);
+            }
+        });
 
         playButtonFrame.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
             if (playButton.getImage() == playImg) {
@@ -330,7 +356,7 @@ public final class GameRenderer {
                 }
             }
 
-            primaryStage.setScene(sceneHistory.pop());
+            primaryStage.setScene(sceneHistory.pop().get());
         });
 
         var topUi = new HBox(playButtonFrame, createHSpacer(), centerPane, createHSpacer(), backButton);
