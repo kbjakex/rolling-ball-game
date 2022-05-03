@@ -35,3 +35,13 @@ sequenceDiagram
    GraphStorage -->> GameState: List<Graph>
    GameState -->> GameRenderer: List<Graph>
 ```
+
+## Käyttöliittymä
+
+Peli koostuu kolmesta eri näkymästä: päävalikko, kenttävalikko ja pelinäkymä. Jokainen näkymä on oma Scene-olionsa, ja vain yksi on kerrallaan näkyvissä. Käyttöliittymä on täysin eristetty pakkaukseen `rollingball.ui`, mutta käyttöliittymäkoodi käytännössä hallinnoi koodia kutsumalla projektin muita luokkia.
+
+## Tietojen tallennus
+
+Peli tallentaa käyttäjän edistymisen `rollingballdata.dat`-tiedostoon, jota hallinnoi koodissa Data Access Object (DAO) -mallia mukailevat UserProgressDao- ja FileUserProgressDao-luokat. Tiedosto luetaan kerran sovelluksen käynnistyessä, ja muutokset tallennetaan sovellusta suljettaessa. Muulloin tiedot pidetään välimuistissa, jotta niiden lukeminen ja muokkaaminen on nopeaa ja helppoa.
+
+`rollingballdata.dat`-tiedosto luodaan samaan kansioon, jossa sovellus käynnistetään.
