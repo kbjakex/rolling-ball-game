@@ -2,7 +2,7 @@
 
 Sovellus on peli, jossa ohjataan kaksiulotteisessa avaruudessa oikealle kulkeva pallo lähdöstä maaliin kirjoittamalla yhtälöitä, joilla määritellään pallolle pintoja, joiden päällä pyöriä.
 
-Meneillään on viikko 5. Peli on pelattavissa, mutta kentät ovat alkukantaisia (liian helppoja / tylsiä). Pisteytys ja edistymisen tallennus puuttuu ja kenttävalikko on alkukantainen.
+Meneillään on viikko 6. Peli on yhtä kenttää ja hiomista vaille valmis. Kaikki suunnitellut ominaisuudet toimivat.
 
 ## Dokumentaatio
 
