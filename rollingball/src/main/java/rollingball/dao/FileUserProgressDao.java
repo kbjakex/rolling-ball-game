@@ -32,7 +32,7 @@ public final class FileUserProgressDao implements UserProgressDao {
         var it = levelCompletions.listIterator();
         while (it.hasNext()) {
             var levelCompletion = it.next();
-            if (levelCompletion.level()!= levelCompletionInfo.level()) {
+            if (levelCompletion.level() != levelCompletionInfo.level()) {
                 continue;
             }
 
@@ -45,7 +45,7 @@ public final class FileUserProgressDao implements UserProgressDao {
         // Otherwise, add
         levelCompletions.add(levelCompletionInfo);
 
-        if (levelCompletionInfo.level()== nextUncompletedLevel) {
+        if (levelCompletionInfo.level() == nextUncompletedLevel) {
             this.nextUncompletedLevel = this.nextUncompletedLevel.next();
         }
     }

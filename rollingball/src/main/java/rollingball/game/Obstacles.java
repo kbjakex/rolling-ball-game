@@ -28,6 +28,7 @@ public final class Obstacles {
 
         /**
          * Constructs a new spike.
+         * 
          * @param x the x coordinate of the spike
          * @param y the y coordinate of the spike
          */
@@ -73,21 +74,22 @@ public final class Obstacles {
 
         /**
          * Constructs a new spike wheel.
-         * @param x the x coordinate of the center of the wheel
-         * @param y the y coordinate of the center of the wheel
+         * 
+         * @param x        the x coordinate of the center of the wheel
+         * @param y        the y coordinate of the center of the wheel
          * @param numEdges the number of edges in the wheel
-         * @param radius the radius of the wheel
-         * @param speed the speed of rotation
+         * @param radius   the radius of the wheel
+         * @param speed    the speed of rotation
          */
         public SpikeWheel(double x, double y, int numEdges, int radius, double speed) {
-            this.spikes = new ArrayList<>(numEdges * (radius-1)+1);
+            this.spikes = new ArrayList<>(numEdges * (radius - 1) + 1);
             this.centerX = x;
             this.centerY = y;
             this.numEdges = numEdges;
             this.radius = radius;
             this.speed = speed;
 
-            for (int i = 0; i < numEdges * (radius-1) + 1; ++i) {
+            for (int i = 0; i < numEdges * (radius - 1) + 1; ++i) {
                 spikes.add(new Spike(0, 0));
             }
             update(0.0); // init spike positions
@@ -95,6 +97,7 @@ public final class Obstacles {
 
         /**
          * Returns the spikes in the wheel.
+         * 
          * @return an unmodifiable view of the spikes
          */
         public List<Spike> getSpikes() {
@@ -116,7 +119,7 @@ public final class Obstacles {
                 angle += angleStep;
             }
         }
-        
+
         @Override
         public boolean checkWouldKill(Ball ball) {
             for (var spike : spikes) {

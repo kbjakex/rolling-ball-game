@@ -11,9 +11,9 @@ import rollingball.game.Level.XY;
 import rollingball.game.Obstacles.Spike;
 
 /**
- * Contains the list of levels defined for the game. 
+ * Contains the list of levels defined for the game.
  * Each level has a name and id and contains the logic
- * for the placement of the obstacles in the level. 
+ * for the placement of the obstacles in the level.
  * A blueprint may also define the update logic for a level.
  */
 public enum LevelBlueprint {
@@ -73,8 +73,8 @@ public enum LevelBlueprint {
                 obstacles.add(new Spike(0, i));
             }
             for (int i = 0; i < 5; ++i) {
-                obstacles.add(new Spike(-3-i, 0));
-                obstacles.add(new Spike(3+i, 0));
+                obstacles.add(new Spike(-3 - i, 0));
+                obstacles.add(new Spike(3 + i, 0));
             }
             return new Level(this, XY.of(-6, 3), XY.of(6, 3), obstacles);
         }
@@ -97,7 +97,8 @@ public enum LevelBlueprint {
 
             Level4(LevelBlueprint level, XY start, XY end, List<Obstacle> spikes) {
                 super(level, start, end, spikes);
-                this.basePositions = spikes.stream().map(s -> (Spike)s).map(s -> XY.of(s.getX(), s.getY())).collect(Collectors.toList());
+                this.basePositions = spikes.stream().map(s -> (Spike) s).map(s -> XY.of(s.getX(), s.getY()))
+                        .collect(Collectors.toList());
             }
 
             @Override
@@ -168,6 +169,7 @@ public enum LevelBlueprint {
 
     /**
      * Returns a human-readable name of the level, intended for display to the user.
+     * 
      * @return the name
      */
     public final String getName() {
@@ -175,7 +177,9 @@ public enum LevelBlueprint {
     }
 
     /**
-     * Returns an identifier that uniquely identifies the level, intended for saving to a file.
+     * Returns an identifier that uniquely identifies the level, intended for saving
+     * to a file.
+     * 
      * @return the id
      */
     public final int getId() {
@@ -184,26 +188,31 @@ public enum LevelBlueprint {
 
     /**
      * Computes a score for the user based on the time and number of equations used.
+     * 
      * @param numEquations the number of equations
-     * @param timeSeconds the completion time in seconds
+     * @param timeSeconds  the completion time in seconds
      * @return a score in range [0, 1], where 1 is perfect
      */
     public abstract double computeScorePercentage(int numEquations, double timeSeconds);
 
     /**
      * Creates a new instance of the level.
+     * 
      * @return the instance
      */
     public abstract Level createInstance();
 
     /**
      * Returns the next level, or null if there is no next level.
+     * 
      * @return the next level
      */
     public abstract LevelBlueprint next();
 
     /**
-     * Returns the level with the given id, or an empty optional if there is no such level.
+     * Returns the level with the given id, or an empty optional if there is no such
+     * level.
+     * 
      * @param id the id
      * @return the level
      */
@@ -217,6 +226,6 @@ public enum LevelBlueprint {
     }
 
     private static double score(int numEquations, double timeSeconds, int targetEquations, double targetTime) {
-        return 1.0 - (numEquations-targetEquations) / 3.0 - Math.max(0, timeSeconds - targetTime) / 3.0;
+        return 1.0 - (numEquations - targetEquations) / 3.0 - Math.max(0, timeSeconds - targetTime) / 3.0;
     }
 }

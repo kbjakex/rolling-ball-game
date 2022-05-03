@@ -6,7 +6,9 @@ import rollingball.game.LevelBlueprint;
 
 public interface UserProgressDao {
 
-    static final record Equation(String formula, String condition) {}
+    static final record Equation(String formula, String condition) {
+    }
+    
     static final record LevelCompletionInfo(LevelBlueprint level, List<Equation> equations, double scorePercentage) {
     }
     
