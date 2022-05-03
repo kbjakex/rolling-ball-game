@@ -21,3 +21,5 @@
 | 26.4  | 1    | lippu & kentän "voittaminen" | 
 | 26.4  | 1.3  | piikkiesteet ja neljä ensimmäistä kenttää |
 | 3.5   | 5    | pelitilanteen tallennus ja lataus tiedoston avulla; kenttävalikon grafiikat; pisteiden laskeminen; kenttien avaaminen |
+
+Yhteensä 47.8 tuntia
