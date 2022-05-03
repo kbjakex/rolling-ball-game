@@ -5,8 +5,6 @@ import rollingball.game.Obstacles.SpikeWheel;
 
 /**
  * An interface implemented by all obstacles.
- * For the simulation, it is enough to know if an obstacle
- * would kill the ball at any given point in time.
  */
 public sealed interface Obstacle permits Spike, SpikeWheel {
 
@@ -18,6 +16,10 @@ public sealed interface Obstacle permits Spike, SpikeWheel {
      */
     boolean checkWouldKill(Ball ball);
 
+    /**
+     * Updates the obstacle's state. This method is called once per frame.
+     * @param timeSeconds time in seconds since the simulation started
+     */
     default void update(double timeSeconds) {
     }
 

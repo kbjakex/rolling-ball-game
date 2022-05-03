@@ -3,11 +3,9 @@ package rollingball.game;
 import rollingball.functions.EvalContext;
 import rollingball.functions.Function;
 
-import static rollingball.game.Ball.BALL_RADIUS;
-
 /**
 Problem: For the ball to roll on *top* of the curves, simply computing its y (upwards) position as
-`f(x) + r` (where `r` is the radius of the ball) is not enough (unless for *perfectly* horizontal 
+`f(x) + r` (where `r` is the Ball.RADIUS of the ball) is not enough (unless for *perfectly* horizontal 
 lines). It would clip the curves on any upwards or downwards slopes.
 
 One solution is to compute `f(x) - g(x)` (where `g(x)` models the curve of
@@ -20,7 +18,7 @@ This is exactly what this class is for.
 Finding the maximum value is yuck because there's obviously no closed-form solution,
 but golden-section search gets there robustly and with reliable performance: the
 number of times the curve function needs to be evaluated is constant (about 35-40 in practice
-depending on ball radius and tolerance).
+depending on ball Ball.RADIUS and tolerance).
 
 A note about modality: the algorithm expects unimodal functions, but in practice, *which* maximum
 it converges to doesn't matter as long as it truly is the highest point. So even though I can
@@ -33,7 +31,7 @@ public final class GoldenSectionSearch {
     // Constants for the golden-section search
     private static final double PHI = (1 + Math.sqrt(5.0)) / 2.0;
     private static final double TOLERANCE = 1e-6;
-    private static final double BALL_DIAMETER = BALL_RADIUS * 2.0;
+    private static final double BALL_DIAMETER = Ball.RADIUS * 2.0;
 
     // Number of steps required to achieve desired tolerance
     private static final int NUM_ITERATIONS = (int) (Math
@@ -50,8 +48,8 @@ public final class GoldenSectionSearch {
      */
     public static double computeBallYOnCurve(Function f, EvalContext ctx, double ballX) {
         var h = BALL_DIAMETER;
-        var a = ballX - BALL_RADIUS;
-        var b = ballX + BALL_RADIUS;
+        var a = ballX - Ball.RADIUS;
+        var b = ballX + Ball.RADIUS;
 
         var c = a + h / (PHI * PHI);
         var d = a + h / PHI;
@@ -90,6 +88,6 @@ public final class GoldenSectionSearch {
     }
 
     private static double ballCurve(double x) {
-        return BALL_RADIUS - Math.sqrt(BALL_RADIUS * BALL_RADIUS - x * x);
+        return Ball.RADIUS - Math.sqrt(Ball.RADIUS * Ball.RADIUS - x * x);
     }
 }

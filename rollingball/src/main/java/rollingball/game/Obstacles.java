@@ -54,12 +54,15 @@ public final class Obstacles {
             var dx = ball.getX() - x;
             var dy = ball.getY() - y;
             var spikeRadius = 0.35;
-            var ballRadius = Ball.BALL_RADIUS;
+            var ballRadius = Ball.RADIUS;
             var collisionRadius = spikeRadius + ballRadius;
             return dx * dx + dy * dy < collisionRadius * collisionRadius;
         }
     }
 
+    /**
+     * A rotating wheel of spikes for maximum danger.
+     */
     public static final class SpikeWheel implements Obstacle {
         private final List<Spike> spikes;
         private final double centerX;
@@ -68,6 +71,14 @@ public final class Obstacles {
         private final int radius;
         private final double speed;
 
+        /**
+         * Constructs a new spike wheel.
+         * @param x the x coordinate of the center of the wheel
+         * @param y the y coordinate of the center of the wheel
+         * @param numEdges the number of edges in the wheel
+         * @param radius the radius of the wheel
+         * @param speed the speed of rotation
+         */
         public SpikeWheel(double x, double y, int numEdges, int radius, double speed) {
             this.spikes = new ArrayList<>(numEdges * (radius-1)+1);
             this.centerX = x;
@@ -82,6 +93,10 @@ public final class Obstacles {
             update(0.0); // init spike positions
         }
 
+        /**
+         * Returns the spikes in the wheel.
+         * @return an unmodifiable view of the spikes
+         */
         public List<Spike> getSpikes() {
             return Collections.unmodifiableList(spikes);
         }

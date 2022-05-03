@@ -118,7 +118,7 @@ public final class GameRenderer {
         graphics.setStroke(Color.BLACK);
         graphics.setFill(Color.GRAY);
         var ball = state.getBall();
-        var diameter = Ball.BALL_RADIUS * PX_PER_GRAPH_AREA_UNIT * 2.0;
+        var diameter = Ball.RADIUS * PX_PER_GRAPH_AREA_UNIT * 2.0;
         graphics.fillOval(
                 ball.getX() * PX_PER_GRAPH_AREA_UNIT - diameter / 2.0,
                 -ball.getY() * PX_PER_GRAPH_AREA_UNIT - diameter / 2.0,

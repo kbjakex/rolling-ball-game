@@ -9,7 +9,7 @@ public final class Ball {
     /**
      * The radius of the ball in level coordinates.
      */
-    public static final double BALL_RADIUS = 0.4;
+    public static final double RADIUS = 0.4;
 
     double x;
     double y;
@@ -36,7 +36,7 @@ public final class Ball {
     public void reset(Level level) {
         var start = level.getStart();
         this.x = start.x();
-        this.y = start.y() + BALL_RADIUS;
+        this.y = start.y() + RADIUS;
         this.lastCollisionTimestamp = 0.0;
     }
 }

@@ -46,11 +46,9 @@ public final class GameSimulator {
 
     private Level level;
 
-    private double startTimeSeconds;
+    private double simulationTimeSeconds;
     private boolean isPlaying;
     private final GameEndCallback playEndCallback;
-
-    private double timeOnLastUpdate;
 
     private Ball theBall;
 
@@ -61,8 +59,7 @@ public final class GameSimulator {
      */
     public GameSimulator(Level level, GameEndCallback playEndCallback) {
         this.graphs = new FunctionStorage();
-        this.startTimeSeconds = 0.0;
-        this.timeOnLastUpdate = 0.0;
+        this.simulationTimeSeconds = 0.0;
         this.isPlaying = false;
         this.level = level;
         this.theBall = new Ball(level);
@@ -74,10 +71,6 @@ public final class GameSimulator {
      */
     public void togglePlaying() {
         this.isPlaying = !this.isPlaying;
-        if (this.isPlaying) {
-            this.startTimeSeconds = System.nanoTime() / 1_000_000_000.0;
-            this.timeOnLastUpdate = 0.0;
-        }
         this.theBall.reset(this.level);
     }
 
@@ -89,7 +82,7 @@ public final class GameSimulator {
         if (!this.isPlaying) {
             return 0.0;
         }
-        return System.nanoTime() / 1_000_000_000.0 - this.startTimeSeconds;
+        return simulationTimeSeconds;
     }
 
     /**
@@ -135,8 +128,8 @@ public final class GameSimulator {
      */
     public void update() {
         if (this.isPlaying) {
-            var timeSeconds = System.nanoTime() / 1_000_000_000.0 - this.startTimeSeconds;
-            var deltaTime = timeSeconds - this.timeOnLastUpdate;
+            var timeSeconds = simulationTimeSeconds;
+            var deltaTime = 1.0 / 60.0; // 60 FPS
 
             this.level.onUpdate(timeSeconds, deltaTime);
 
@@ -149,7 +142,7 @@ public final class GameSimulator {
                 playEndCallback.onGameEnd(true, timeSeconds);
             }
 
-            this.timeOnLastUpdate = timeSeconds;
+            this.simulationTimeSeconds += deltaTime;
         }
     }
 
@@ -168,7 +161,7 @@ public final class GameSimulator {
 
     private boolean checkIsTouchingFlag() {
         var end = level.getEnd();
-        var r = Ball.BALL_RADIUS;
+        var r = Ball.RADIUS;
         return end.x() <= theBall.x + r && theBall.x - r <= end.x() + FLAG_SIZE &&
                 end.y() <= theBall.y + r && theBall.y - r <= end.y() + FLAG_SIZE;
     }
@@ -176,7 +169,7 @@ public final class GameSimulator {
     private void updateBallPos(double time, double deltaTime) {
         var ctx = new EvalContext(time);
 
-        var nextY = theBall.y - computeGravity(time) - Ball.BALL_RADIUS;
+        var nextY = theBall.y - computeGravity(time) - Ball.RADIUS;
         var nextX = theBall.x + computeHorizontalSpeed(deltaTime, ctx);
 
         Graph curve = null;
@@ -197,7 +190,7 @@ public final class GameSimulator {
             }
         }
         theBall.x = nextX;
-        theBall.y = nextY + Ball.BALL_RADIUS;
+        theBall.y = nextY + Ball.RADIUS;
         theBall.collidingCurve = curve;
     }
 
