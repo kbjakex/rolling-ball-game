@@ -30,7 +30,7 @@ Peli käynnistyy "päävalikkoon", josta päästään joko jatkamaan aiempaa pel
 - käyttäjä voi hävitä pelin a) pallon tippuessa pois pelialueelta tai b) törmäämällä esteeseen (**tehty**)
 - käyttäjä voi kenttiä ratkaisemalla "avata" uusia kenttiä pelattavaksi (**tehty**)
 - käyttäjä näkee kenttävalikkonäkymästä kenttäkohtaisen suorituksensa, mikä arvioidaan tähdillä (0-3 tähteä), joiden määrä lasketaan ensisijaisesti käytettyjen yhtälöiden määrästä (täydet kolme saa vain yhdellä yhtälöllä) ja toissijaisesti pallon kulkemisajan perusteella. (**tehty**)
-- sovellus sisältää vähintään 5 kenttää (4/5 tehty)
+- sovellus sisältää vähintään 5 kenttää (**tehty**)
 - sovellus tallentaa käyttäjän edistymisen sovellusbinäärin kanssa samaan kansioon binääritiedostoon "rollingballdata.dat" (**tehty**)
 - sovellus lataa `rollingballdata.dat` tiedoston sisällön käynnistyessä (**tehty**)
 
