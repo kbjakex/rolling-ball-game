@@ -216,12 +216,6 @@ public class FunctionParserTest {
         assertEquals(true, FunctionParser.parse("", "5 >= 3").canEval(null));
         assertEquals(true, FunctionParser.parse("", "3 >= 3").canEval(null));
         assertEquals(false, FunctionParser.parse("", "2.9 >= 3").canEval(null));
-        
-        assertEquals(false, FunctionParser.parse("", "5 == 3").canEval(null));
-        assertEquals(true, FunctionParser.parse("", "5 == 5").canEval(null));
-        
-        assertEquals(true, FunctionParser.parse("", "5 != 3").canEval(null));
-        assertEquals(false, FunctionParser.parse("", "3 != 3").canEval(null));
     }
 
     @Test

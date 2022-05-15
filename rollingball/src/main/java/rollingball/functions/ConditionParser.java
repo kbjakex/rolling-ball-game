@@ -27,8 +27,6 @@ public final class ConditionParser extends Parser<Condition> {
         var res = switch (first) {
             case '<' -> eq ? RelationalOp.LE : RelationalOp.LT;
             case '>' -> eq ? RelationalOp.GE : RelationalOp.GT;
-            case '=' -> eq ? RelationalOp.EQ : null;
-            case '!' -> eq ? RelationalOp.NE : null;
             default -> null;
         };
         if (res == null) {
@@ -79,8 +77,6 @@ public final class ConditionParser extends Parser<Condition> {
             case LE -> ctx -> lhs.eval(ctx) <= rhs.eval(ctx);
             case GT -> ctx -> lhs.eval(ctx) > rhs.eval(ctx);
             case GE -> ctx -> lhs.eval(ctx) >= rhs.eval(ctx);
-            case EQ -> ctx -> lhs.eval(ctx) == rhs.eval(ctx);
-            case NE -> ctx -> lhs.eval(ctx) != rhs.eval(ctx);
         };
     }
 

@@ -29,27 +29,6 @@ public final class Operators {
     }
 
     public enum RelationalOp {
-        LT(1), LE(1), GT(1), GE(1), EQ(0), NE(0);
-
-        private final int precedence;
-
-        private RelationalOp(int precedence) {
-            this.precedence = precedence;
-        }
-
-        public int getPrecedence() {
-            return this.precedence;
-        }
-
-        public boolean apply(double lhs, double rhs) {
-            return switch (this) {
-                case LT -> lhs < rhs;
-                case LE -> lhs <= rhs;
-                case GT -> lhs > rhs;
-                case GE -> lhs >= rhs;
-                case EQ -> lhs == rhs;
-                case NE -> lhs != rhs;
-            };
-        }
+        LT, LE, GT, GE
     }
 }
