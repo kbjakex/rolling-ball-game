@@ -23,5 +23,6 @@
 | 3.5   | 5    | pelitilanteen tallennus ja lataus tiedoston avulla; kenttävalikon grafiikat; pisteiden laskeminen; kenttien avaaminen |
 | 3.5   | 3    | javadocs osa 1; viimeisen kentän lisäys ja kenttien viimeistely |
 | 3.5   | 1.5  | siistimistä; lisää testejä; javadocin korjaus |
+| 15.5  | 5.5  | testausta; dokumentaatiota; käyttökokemuksen hiomista; loput JavaDocit; release |
 
-Yhteensä 52.3 tuntia
+Yhteensä 55.8 tuntia
