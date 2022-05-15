@@ -22,9 +22,11 @@ Molemmat GitHub-käyttäjät ovat minun. Projektia on tehty kahdella eri koneell
 
 ## Releaset
 
-[Viikko 5](https://github.com/kbjakex/ot-harjoitystyo/releases/tag/viikko5)
+[Viikko 7](https://github.com/kbjakex/ot-harjoitystyo/releases/tag/Loppupalautus)
 
 [Viikko 6](https://github.com/kbjakex/ot-harjoitystyo/releases/tag/viikko6)
+
+[Viikko 5](https://github.com/kbjakex/ot-harjoitystyo/releases/tag/viikko5)
 
 ### Testaus
 
