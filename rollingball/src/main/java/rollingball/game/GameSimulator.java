@@ -108,6 +108,7 @@ public final class GameSimulator {
     /**
      * Adds a graph to the simulation.
      * @param fn the graph to add
+     * @return a {@link FunctionStorage.Graph} object for the function
      */
     public Graph addGraph(Function fn) {
         return graphs.addGraph(fn);
@@ -123,6 +124,7 @@ public final class GameSimulator {
 
     /**
      * Returns the list of graphs currently in use.
+     * @return the list of graphs
      */
     public List<Graph> getGraphs() {
         return graphs.getGraphs();

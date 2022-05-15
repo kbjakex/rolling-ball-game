@@ -24,7 +24,7 @@ public final class Function {
         /**
          * Tries to to evaluate the expression without context. Meant for
          * simplifying expressions where possible during parsing.
-         * @returns the result of evaluating the expression, or null if context is required.
+         * @return the result of evaluating the expression, or null if context is required.
          */
         default Double tryConstEvaluate() {
             return null;
@@ -35,6 +35,8 @@ public final class Function {
          * <code>expr -> val</code>, this implementation will correctly
          * evaluate to the number without context, making it
          * possible to simplify expressions.
+         * @param val the constant value
+         * @return the Expr node
          */
         static Expr constant(double val) {
             return new Expr() {
@@ -69,7 +71,7 @@ public final class Function {
         /**
          * Tries to to evaluate the condition without context. Meant for
          * simplifying conditions where possible during parsing.
-         * @returns the result of evaluating the condition, or null if context is required.
+         * @return the result of evaluating the condition, or null if context is required.
          */
         default Boolean tryConstEvaluate() {
             return null;
@@ -80,6 +82,8 @@ public final class Function {
          * <code>cond -> val</code>, this implementation will correctly
          * evaluate to the boolean without context, making it
          * possible to simplify conditions.
+         * @param result the constant value.
+         * @return the Condition node
          */
         static Condition constant(boolean result) {
             return new Condition() {

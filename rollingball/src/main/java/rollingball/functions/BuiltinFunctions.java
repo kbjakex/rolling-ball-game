@@ -26,7 +26,7 @@ public final class BuiltinFunctions {
      * @param name the name of the function.
      * @param firstParam the first parameter to the function.
      * @param paramSupplier a supplier of parameters for if more than one are needed.
-     * @returns the {@link Expr} representing the function call. Never null.
+     * @return the {@link Expr} representing the function call. Never null.
      * @throws ParserException if the function name is not recognized.
      */
     public static Expr parseFunctionCall(String name, Expr firstParam, Supplier<Expr> paramSupplier) {

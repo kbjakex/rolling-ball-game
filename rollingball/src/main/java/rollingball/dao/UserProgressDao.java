@@ -19,9 +19,9 @@ public interface UserProgressDao {
 
     /**
      * Information about the completion of a level.
-     * @param levelBlueprint the level in question.
-     * @param equations the equations used to solve the level.
-     * @param scorePercentage the percentage of the score achieved, from 0 to 1 (1 is max).
+     * <p>- level: the level in question.
+     * <p>- equations: the equations used to solve the level.
+     * <p>- scorePercentage: the percentage of the score achieved, from 0 to 1 (1 is max).
      */
     static final record LevelCompletionInfo(LevelBlueprint level, List<Equation> equations, double scorePercentage) {
     }

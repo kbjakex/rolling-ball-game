@@ -12,8 +12,8 @@ public final class FunctionParser {
     /**
      * Parses an expression and a condition and returns a function representing them.
      * If either of the strings are empty, null is returned.
-     * @param expression the expression to parse.
-     * @param condition the condition to parse.
+     * @param exprString the expression to parse.
+     * @param conditionString the condition to parse.
      * @return the function representing the expression and the condition, or null.
      * @throws ParserException if the expression or condition have invalid syntax.
      */

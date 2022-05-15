@@ -11,15 +11,25 @@ public final class Operators {
      * Represents an arithmetic operator.
      */
     public enum ArithmeticOp {
-        /// Represents the addition operator '+'.
+        /** 
+         * Represents the addition operator '+'.
+         */
         ADD(1), 
-        /// Represents the subtraction operator '-'.
+        /** 
+         * Represents the subtraction operator '-'.
+         */
         SUB(1), 
-        /// Represents the multiplication operator '*'.
+        /** 
+         * Represents the multiplication operator '*'.
+         */
         MUL(2), 
-        /// Represents the division operator '/'.
+        /** 
+         * Represents the division operator '/'.
+         */
         DIV(2), 
-        /// Represents the exponentiation operator '^'.
+        /** 
+         * Represents the exponentiation operator '^'.
+         */
         POW(3);
 
         private final int precedence;
@@ -61,13 +71,21 @@ public final class Operators {
      * why there is currently no precedence field.
      */
     public enum RelationalOp {
-        /// Represents the less-than operator '<'.
+        /** 
+         * Represents the less-than operator '&lt;'.
+         */
         LT, 
-        /// Represents the less-than-or-equal operator '<='.
+        /** 
+         * Represents the less-than-or-equal operator '&lt;='.
+         */
         LE, 
-        /// Represents the greater-than operator '>'.
+        /** 
+         * Represents the greater-than operator '&gt;'.
+         */
         GT, 
-        /// Represents the greater-than-or-equal operator '>='.
+        /** 
+         * Represents the greater-than-or-equal operator '&gt;='.
+         */
         GE
     }
 }

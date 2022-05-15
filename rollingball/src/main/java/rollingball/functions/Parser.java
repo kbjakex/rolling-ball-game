@@ -11,9 +11,19 @@ public abstract sealed class Parser<T> permits ExpressionParser, ConditionParser
      */
     public static record ParseResult<T>(T value, int nextCharIdx) { }
 
+    /** 
+     * source string being parsed
+     */
     protected char[] src;
+    /**
+     * index of the next unconsumed character in the source string
+     */
     protected int srcPos;
 
+    /**
+     * Parses the specified source string.
+     * @return the result of the parsing operation.
+     */
     protected abstract T doParse();
 
     /**
@@ -62,10 +72,19 @@ public abstract sealed class Parser<T> permits ExpressionParser, ConditionParser
         return false;
     }
 
+    /**
+     * Checks if the next character is the specified one. Does not modify state.
+     * @param type the expected character.
+     * @return true if the next character is the specified one, false otherwise.
+     */
     protected boolean nextIs(char type) {
         return srcPos < src.length && src[srcPos] == type;
     }
 
+    /**
+     * Checks if there are more characters to be parsed.
+     * @return true if there are more characters to be parsed, false otherwise.
+     */
     protected boolean hasNext() {
         return srcPos < src.length;
     }

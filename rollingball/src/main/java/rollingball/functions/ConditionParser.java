@@ -11,7 +11,7 @@ import rollingball.functions.Operators.RelationalOp;
 public final class ConditionParser extends Parser<Condition> {
 
     private final ExpressionParser exprParser;
-
+    
     public ConditionParser() {
         this.exprParser = new ExpressionParser();
     }
