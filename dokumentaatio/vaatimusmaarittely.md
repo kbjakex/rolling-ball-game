@@ -12,7 +12,7 @@ Peli käynnistyy "päävalikkoon", josta päästään joko jatkamaan aiempaa pel
 "Kenttävalikkonäkymässä" on pelin kaikki kentät perättäin vaakatasossa, joita painamalla päästään pelaamaan haluttua kenttää.
 "Pelinäkymästä" voi siirtyä joko takaisin päävalikkoon, tai kentän läpäistyä seuraavaan kenttään.
 
-<img src="https://raw.githubusercontent.com/kbjakex/ot-harjoitystyo/main/dokumentaatio/kuvat/kayttoliittymadraft.jpg" width="800">
+Käyttöliittymästä löytyy kuvia [käyttoohje](https://github.com/kbjakex/ot-harjoitystyo/blob/main/dokumentaatio/kayttoohje.md)-dokumentista.
 
 ## Toiminnallisuus
 
