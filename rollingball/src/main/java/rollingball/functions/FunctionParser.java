@@ -10,6 +10,9 @@ public final class FunctionParser {
         var expr = parseChecked(exprString, new ExpressionParser());
         var cond = parseChecked(conditionString, new ConditionParser());
 
+        if (expr == null) {
+            return null;
+        }
         if (cond == null) {
             return new Function(expr, ctx -> true);
         }

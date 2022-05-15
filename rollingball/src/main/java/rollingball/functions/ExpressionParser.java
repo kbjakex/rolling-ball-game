@@ -33,7 +33,11 @@ public final class ExpressionParser extends Parser<Expr> {
         }
 
         if (posBefore == srcPos) {
-            throw new ParserException("Expected a number, found '%s'", srcPos == src.length ? "EOF" : ("" + src[srcPos]));
+            if (srcPos == src.length) {
+                throw new ParserException("Expression cannot end with an operator or '('");
+            } else {
+                throw new ParserException("Expected a number or '(' instead of '%s'", new String(src, srcPos, src.length - srcPos));
+            }
         }
 
         return Expr.constant(result);

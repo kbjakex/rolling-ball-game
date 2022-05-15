@@ -255,7 +255,7 @@ public final class GameRenderer {
             }
         });
         conditionInput.setOnKeyPressed(keyEvent -> {
-            if (conditionInput.getText().isEmpty() || keyEvent.getCode() != javafx.scene.input.KeyCode.ENTER) {
+            if (FunctionParser.removeWhitespace(conditionInput.getText()).length == 0 || keyEvent.getCode() != javafx.scene.input.KeyCode.ENTER) {
                 return;
             }
             if (equationInput.getText().isEmpty()) {
@@ -371,10 +371,9 @@ public final class GameRenderer {
         backButton.setOnAction(e -> {
             if (!state.getGraphs().isEmpty()) {
                 Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-                alert.setTitle("Discard progress?");
+                alert.setTitle("Progress will not be saved");
                 alert.setHeaderText(
-                        "State saving functionality is not yet implemented and exiting will discard any current progress.");
-                alert.setContentText("Exit anyways?");
+                        "Discard progress in current level and exit?");
                 alert.showAndWait();
 
                 if (alert.getResult() == ButtonType.CANCEL) {
@@ -475,7 +474,7 @@ public final class GameRenderer {
             return FunctionParser.parse(expressionString, conditionString);
         } catch (ParserException ex) {
             var errorAlert = new Alert(AlertType.ERROR);
-            errorAlert.setHeaderText("Input not valid");
+            errorAlert.setHeaderText("Invalid input");
             errorAlert.setContentText(ex.getMessage());
             errorAlert.showAndWait();
             return null;
