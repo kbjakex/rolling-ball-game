@@ -201,21 +201,21 @@ public class FunctionParserTest {
 
     @Test
     public void testRelationalOpsWork() {
-        assertEquals(false, FunctionParser.parse("", "5 < 3").canEval(null));
-        assertEquals(false, FunctionParser.parse("", "5 < 5").canEval(null));
-        assertEquals(true, FunctionParser.parse("", "5 < 5.1").canEval(null));
+        assertEquals(false, FunctionParser.parse("x", "5 < 3").canEval(null));
+        assertEquals(false, FunctionParser.parse("x", "5 < 5").canEval(null));
+        assertEquals(true, FunctionParser.parse("x", "5 < 5.1").canEval(null));
 
-        assertEquals(true, FunctionParser.parse("", "5 > 3").canEval(null));
-        assertEquals(false, FunctionParser.parse("", "3 > 3").canEval(null));
-        assertEquals(false, FunctionParser.parse("", "2 > 3").canEval(null));
+        assertEquals(true, FunctionParser.parse("x", "5 > 3").canEval(null));
+        assertEquals(false, FunctionParser.parse("x", "3 > 3").canEval(null));
+        assertEquals(false, FunctionParser.parse("x", "2 > 3").canEval(null));
         
-        assertEquals(false, FunctionParser.parse("", "5 <= 4.9").canEval(null));
-        assertEquals(true, FunctionParser.parse("", "5 <= 5").canEval(null));
-        assertEquals(true, FunctionParser.parse("", "5 <= 5.1").canEval(null));
+        assertEquals(false, FunctionParser.parse("x", "5 <= 4.9").canEval(null));
+        assertEquals(true, FunctionParser.parse("x", "5 <= 5").canEval(null));
+        assertEquals(true, FunctionParser.parse("x", "5 <= 5.1").canEval(null));
 
-        assertEquals(true, FunctionParser.parse("", "5 >= 3").canEval(null));
-        assertEquals(true, FunctionParser.parse("", "3 >= 3").canEval(null));
-        assertEquals(false, FunctionParser.parse("", "2.9 >= 3").canEval(null));
+        assertEquals(true, FunctionParser.parse("x", "5 >= 3").canEval(null));
+        assertEquals(true, FunctionParser.parse("x", "3 >= 3").canEval(null));
+        assertEquals(false, FunctionParser.parse("x", "2.9 >= 3").canEval(null));
     }
 
     @Test
