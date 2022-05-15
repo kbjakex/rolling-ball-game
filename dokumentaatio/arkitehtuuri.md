@@ -1,16 +1,51 @@
 # Arkkitehtuurikuvaus
 
-Ohjelman rakenne on hierarkkinen: käyttöliittymäluokat (erityisesti GameRenderer.java ja GraphStorage.java) käyttävät `expressions` ja `dao` -paketteja, jotka eivät tiedä toisistaan.
+Ohjelman rakenne on pääosin hierarkkinen. Käyttöliittymäluokat paketissa `ui` käyttävät `functions`-, `game`- ja `dao` -paketteja, ja `game` käyttää `functions`-pakettia. `functions`- ja `dao`-paketit eivät tiedä muista paketeista. Seuraava diagrammi kuvaa ohjelman kunkin paketin oleellisimpia (muttei kaikkia) luokkia, ja pakettien välisiä suhteita:
 
-<img src="https://raw.githubusercontent.com/kbjakex/ot-harjoitystyo/main/dokumentaatio/kuvat/pakkauskaavio.png" width="500">
+```mermaid
+    stateDiagram
+    state ui {
+        GameRenderer
+        RollingBall
+    }
+    state game {
+        GameSimulator
+        LevelBlueprint
+        Level
+        Obstacle
+        Ball
+    }
+    state functions {
+        Function
+        FunctionParser
+        ExpressionParser
+        ConditionParser
+    }
+    state dao {
+        UserProgressDao
+    }
 
-Käyttöliittymää lukuunottamatta ohjelman keskeisiä luokkia ovat `expressions`-paketin rajapinta `Expr`, jonka avulla kaikki matemaattiset yhtälöt esitetään koodissa. 
+    ui --> game
+    ui --> dao
+    ui --> functions
+    game --> functions
+```
 
-GraphStorage on pelinaikainen säilöntäpaikka käyttäjän syöttämille yhtälöille. 
+Sovelluksen sydän on luokat [GameSimulator.java] ja käyttöliittymäluokka [GameRenderer.java]. 
 
-`ui`-paketin `GameRenderer.java` luo ja käyttelee GraphStoragea ja säilöttyjä `Expr`-olioita. `expressions`-paketin `ExpressionParser` luo kaikki ohjelman `Expr`-oliot.
+`GameSimulator` sisältää kaiken ajonaikaisen datan/tilan ja sisältää logiikan pallon liikkumiselle.
+Luokassa on `FunctionStorage`-objekti, joka sisältää tiedon kaikista käyttäjän syöttämistä yhtälöistä ja niihin liittyvästä datasta, kuten väristä. Yhtälö itsessään on `functions`-paketin `Function`-tyyppiä, joka sisältää sekä yhtälön että mahdollisen rajauksen.
+`GameSimulator` on kenttäkohtainen: aina, kun pelaaja vaihtaa kenttää, luodaan uusi GameSimulator-objekti, joka ei tiedä aiemmista mitään. Vanhaa ei säilytetä. 
 
-<img src="https://raw.githubusercontent.com/kbjakex/ot-harjoitystyo/main/dokumentaatio/kuvat/luokkakaavio.png" width="500">
+`GameRenderer` puolestaan ei sisällä sovelluslogiikkaa tai dataa: luokan ainoa tehtävä on piirtää pelitilanne ruudulle, ja vastaanottaa käyttäjän syötteitä. Luokka kommunikoi käyttäjän syötteet pääasiassa suoraan `GameSimulator`-objektille, joka syötteen tyypistä riippuen kutsuu `FunctionStorage`a, tai mahdollisesti käynnistää/lopettaa simulaation. 
+
+Pelin päättyessä (voittoon tai häviöön) `GameSimulator` ilmoittaa asiasta hallinnoivalle luokalle, eli käytännössä `GameRenderer`-objektille, vaikka `GameSimulator` ei asiaa tiedäkään.
+
+## Luokkakaavio
+
+Seuraava luokkakaavio kuvaa projektin keskeisten luokkien suhteita toisiinsa:
+
+<img src="https://raw.githubusercontent.com/kbjakex/ot-harjoitystyo/main/dokumentaatio/kuvat/luokkakaavio.png">
 
 ## Toiminnallisuus
 
@@ -34,6 +69,29 @@ sequenceDiagram
    GameState ->> GraphStorage: getGraphs()
    GraphStorage -->> GameState: List<Graph>
    GameState -->> GameRenderer: List<Graph>
+```
+
+Toinen keskeinen tapahtuma on, kun pelaaja saa vietyä pallohahmon maalilipulle ja kenttä merkitään suoritetuksi. Tällöin lisätään tieto suorituksesta UserProgressDao:n kautta pysyväistallennukseen, ja luodaan ja siirrytään seuraavaan kenttään. Tämä tapahtuu seuraavasti:
+```mermaid
+sequenceDiagram
+   participant GameSimulator
+   participant GameEndCallback
+   participant GameRenderer
+   participant LevelBlueprint   
+   participant UserProgressDao
+   participant Stage
+   GameSimulator ->> GameEndCallback: onGameEnd(isVictory, time)
+   GameEndCallback ->> GameRenderer: lambda
+   GameRenderer ->> LevelBlueprint: computeScorePercentage(equations.size(), time)
+   LevelBlueprint -->> GameRenderer: scorePercentage
+   GameRenderer ->> UserProgressDao: addLevelCompletion(level, equations, scorePercentage)
+   GameRenderer ->> LevelBlueprint: next()
+   LevelBlueprint -->> GameRenderer: nextLevelBlueprint
+   GameRenderer ->> LevelBlueprint: createInstance()
+   LevelBlueprint -->> GameRenderer: nextLevel
+   GameRenderer ->> GameRenderer: createGameScene(..., nextLevel)
+   GameRenderer ->> GameRenderer: new GameRenderer(...)
+   GameRenderer ->> Stage: setScene(...)
 ```
 
 ## Käyttöliittymä
