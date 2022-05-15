@@ -3,6 +3,7 @@ package rollingball.dao;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -12,18 +13,18 @@ import java.util.List;
 
 import rollingball.game.LevelBlueprint;
 
-// TODO: Stub class intended to be integrated & tested for week 5. Changes might occur.
+
 public final class FileUserProgressDao implements UserProgressDao {
     private static final int HEADER_MAGIC = 0x9C6D12E9;
 
     private final List<LevelCompletionInfo> levelCompletions;
-    private final String saveFilePath;
+    private final File saveFile;
 
     private LevelBlueprint nextUncompletedLevel;
 
-    private FileUserProgressDao(String filePath, List<LevelCompletionInfo> levelCompletions, LevelBlueprint nextUncompleted) {
+    private FileUserProgressDao(File file, List<LevelCompletionInfo> levelCompletions, LevelBlueprint nextUncompleted) {
         this.levelCompletions = levelCompletions;
-        this.saveFilePath = filePath;
+        this.saveFile = file;
         this.nextUncompletedLevel = nextUncompleted;
     }
 
@@ -62,7 +63,7 @@ public final class FileUserProgressDao implements UserProgressDao {
 
     @Override
     public void flushChanges() throws Exception {
-        try (var stream = new DataOutputStream(new FileOutputStream(saveFilePath))) {
+        try (var stream = new DataOutputStream(new FileOutputStream(saveFile))) {
             stream.writeInt(HEADER_MAGIC);
             stream.writeInt(levelCompletions.size());
             for (var levelCompletion : levelCompletions) {
@@ -81,12 +82,12 @@ public final class FileUserProgressDao implements UserProgressDao {
         }
     }
 
-    public static FileUserProgressDao empty(String filePath) {
-        return new FileUserProgressDao(filePath, new ArrayList<>(), LevelBlueprint.LEVEL_1);
+    public static FileUserProgressDao empty(File file) {
+        return new FileUserProgressDao(file, new ArrayList<>(), LevelBlueprint.LEVEL_1);
     }
 
-    public static FileUserProgressDao loadFromFile(String filePath) throws IOException {
-        try (var stream = new DataInputStream(new FileInputStream(filePath))) {
+    public static FileUserProgressDao loadFromFile(File file) throws IOException {
+        try (var stream = new DataInputStream(new FileInputStream(file))) {
             if (stream.readInt() != HEADER_MAGIC) {
                 throw new IOException("Invalid file header, not a valid user progress file");
             }
@@ -97,10 +98,12 @@ public final class FileUserProgressDao implements UserProgressDao {
             try {
                 nextUncompleted = LevelBlueprint.fromId(stream.readInt()).orElse(null);
             } catch (EOFException e) {
-                // No next level
+                // No next level - that's fine
             }
 
-            return new FileUserProgressDao(filePath, levelCompletions, nextUncompleted);
+            return new FileUserProgressDao(file, levelCompletions, nextUncompleted);
+        } catch (EOFException ex) {
+            return null;
         }
     }
 

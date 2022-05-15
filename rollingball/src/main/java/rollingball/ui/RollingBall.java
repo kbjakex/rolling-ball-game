@@ -1,5 +1,6 @@
 package rollingball.ui;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Stack;
@@ -36,11 +37,11 @@ public final class RollingBall extends Application {
     }
 
     private void loadOrCreateSaveFile() throws IOException {
-        var saveFilePath = "rollingballdata.dat";
+        var saveFile = new File("rollingballdata.dat");
         try {
-            progressDao = FileUserProgressDao.loadFromFile(saveFilePath);
+            progressDao = FileUserProgressDao.loadFromFile(saveFile);
         } catch (FileNotFoundException ex) {
-            progressDao = FileUserProgressDao.empty(saveFilePath);
+            progressDao = FileUserProgressDao.empty(saveFile);
         }
     }
 
@@ -49,6 +50,22 @@ public final class RollingBall extends Application {
      */
     @Override
     public void start(Stage primaryStage) {
+        if (progressDao == null) {
+            var alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Error");
+            alert.setHeaderText("Could not load progress data");
+            alert.setContentText("The save file \"rollingballdata.dat\" was found but could not be loaded (the file is corrupted).\n" +
+                    "Do you want to override the file?");
+            alert.showAndWait();
+            
+            if (alert.getResult() != ButtonType.OK) {
+                primaryStage.close();
+                return;
+            }
+
+            progressDao = FileUserProgressDao.empty(new File("rollingballdata.dat"));
+        }
+
         primaryStage.setTitle("Rolling Ball Game");
         primaryStage.setScene(createMainMenuScene(primaryStage));
         primaryStage.show();
@@ -243,7 +260,9 @@ public final class RollingBall extends Application {
      */
     @Override
     public void stop() throws Exception {
-        this.progressDao.flushChanges();
+        if (this.progressDao != null) {
+            this.progressDao.flushChanges();
+        }
     }
 
     public static void main(String[] args) {
