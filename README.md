@@ -2,7 +2,9 @@
 
 Sovellus on peli, jossa ohjataan kaksiulotteisessa avaruudessa oikealle kulkeva pallo lähdöstä maaliin kirjoittamalla yhtälöitä, joilla määritellään pallolle pintoja, joiden päällä pyöriä.
 
-Meneillään on viikko 6. Peli on mahdollista hiomista vaille valmis. Kaikki vaatimusmäärittelyn kohdat ovat valmiita.
+Meneillään on viikko 7. Peli on valmis.
+
+Molemmat GitHub-käyttäjät ovat minun. Projektia on tehty kahdella eri koneella ja meneillään on siirtymävaihe uudelle käyttäjälle.
 
 ## Dokumentaatio
 
@@ -14,10 +16,17 @@ Meneillään on viikko 6. Peli on mahdollista hiomista vaille valmis. Kaikki vaa
 
 [Käyttöohje](https://github.com/kbjakex/ot-harjoitystyo/blob/main/dokumentaatio/kayttoohje.md)
 
+[Muutosloki](https://github.com/kbjakex/ot-harjoitystyo/blob/main/dokumentaatio/changelog.md)
+
+[Testausdokumentaatio](https://github.com/kbjakex/ot-harjoitystyo/blob/main/dokumentaatio/testausdokumentti.md)
+
 ## Releaset
 
-[Viikko 5](https://github.com/kbjakex/ot-harjoitystyo/releases/tag/viikko5)
+[Viikko 7](https://github.com/kbjakex/ot-harjoitystyo/releases/tag/Loppupalautus)
+
 [Viikko 6](https://github.com/kbjakex/ot-harjoitystyo/releases/tag/viikko6)
+
+[Viikko 5](https://github.com/kbjakex/ot-harjoitystyo/releases/tag/viikko5)
 
 ### Testaus
 
