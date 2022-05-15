@@ -4,6 +4,10 @@ import rollingball.functions.Function.Condition;
 import rollingball.functions.Function.Expr;
 import rollingball.functions.Operators.RelationalOp;
 
+/**
+ * An implementation of {@link Parser} for expressions that evaluate to a boolean value,
+ * represented with an {@link Function.Condition}.
+ */
 public final class ConditionParser extends Parser<Condition> {
 
     private final ExpressionParser exprParser;

@@ -7,6 +7,10 @@ import java.util.function.Supplier;
 import rollingball.functions.Function.Expr;
 import rollingball.functions.Operators.ArithmeticOp;
 
+/**
+ * An implementation of {@link Parser} for expressions that evaluate to a number,
+ * represented with an {@link Function.Expr}.
+ */
 public final class ExpressionParser extends Parser<Expr> {
 
     @Override

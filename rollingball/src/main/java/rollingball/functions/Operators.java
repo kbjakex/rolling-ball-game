@@ -1,11 +1,26 @@
 package rollingball.functions;
 
+/**
+ * Namespace for operator enums.
+ */
 public final class Operators {
     private Operators() {
     } // Make non-instantiable
 
+    /**
+     * Represents an arithmetic operator.
+     */
     public enum ArithmeticOp {
-        ADD(1), SUB(1), MUL(2), DIV(2), POW(3);
+        /// Represents the addition operator '+'.
+        ADD(1), 
+        /// Represents the subtraction operator '-'.
+        SUB(1), 
+        /// Represents the multiplication operator '*'.
+        MUL(2), 
+        /// Represents the division operator '/'.
+        DIV(2), 
+        /// Represents the exponentiation operator '^'.
+        POW(3);
 
         private final int precedence;
 
@@ -13,10 +28,21 @@ public final class Operators {
             this.precedence = precedence;
         }
 
+        /**
+         * Gets the precedence of this operator. A higher precedence means that this operator
+         * will be evaluated before other operators with a lower precedence.
+         * @return the precedence of this operator.
+         */
         public int getPrecedence() {
             return this.precedence;
         }
 
+        /**
+         * Applies this operator to the two inputs.
+         * @param lhs the left-hand side operand.
+         * @param rhs the right-hand side operand.
+         * @return the result of applying this operator to the inputs.
+         */
         public double apply(double lhs, double rhs) {
             return switch (this) {
                 case ADD -> lhs + rhs;
@@ -28,7 +54,20 @@ public final class Operators {
         }
     }
 
+    /**
+     * Represents a comparison operator.
+     * 
+     * Implementation note: these operators all have the same precedence, which is
+     * why there is currently no precedence field.
+     */
     public enum RelationalOp {
-        LT, LE, GT, GE
+        /// Represents the less-than operator '<'.
+        LT, 
+        /// Represents the less-than-or-equal operator '<='.
+        LE, 
+        /// Represents the greater-than operator '>'.
+        GT, 
+        /// Represents the greater-than-or-equal operator '>='.
+        GE
     }
 }

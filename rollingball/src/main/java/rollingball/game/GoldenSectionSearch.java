@@ -4,25 +4,27 @@ import rollingball.functions.EvalContext;
 import rollingball.functions.Function;
 
 /**
-Problem: For the ball to roll on *top* of the curves, simply computing its y (upwards) position as
-`f(x) + r` (where `r` is the Ball.RADIUS of the ball) is not enough (unless for *perfectly* horizontal 
-lines). It would clip the curves on any upwards or downwards slopes.
-
-One solution is to compute `f(x) - g(x)` (where `g(x)` models the curve of
-the bottom of the ball, i.e `g(x) = r-sqrt(r*r - x*x)`) for x in [ballX-r, ballX+r].
-The roots of this are the intersection points of the ball and the curve, but more importantly,
-its maximum value is exactly the amount the ball needs to be shifted up.
-
-This is exactly what this class is for.
-
-Finding the maximum value is yuck because there's obviously no closed-form solution,
-but golden-section search gets there robustly and with reliable performance: the
-number of times the curve function needs to be evaluated is constant (about 35-40 in practice
-depending on ball Ball.RADIUS and tolerance).
-
-A note about modality: the algorithm expects unimodal functions, but in practice, *which* maximum
-it converges to doesn't matter as long as it truly is the highest point. So even though I can
-make zero guarantees about what the user inputs (sin(x) would be multimodal), this is fine.
+ * An implementation of the golden section search algorithm.
+ * 
+ * Problem: For the ball to roll on *top* of the curves, simply computing its y (upwards) position as
+ * `f(x) + r` (where `r` is the Ball.RADIUS of the ball) is not enough (unless for *perfectly* horizontal 
+ * lines). It would clip the curves on any upwards or downwards slopes.
+ * 
+ * One solution is to compute `f(x) - g(x)` (where `g(x)` models the curve of
+ * the bottom of the ball, i.e `g(x) = r-sqrt(r*r - x*x)`) for x in [ballX-r, ballX+r].
+ * The roots of this are the intersection points of the ball and the curve, but more importantly,
+ * its maximum value is exactly the amount the ball needs to be shifted up.
+ * 
+ * This is exactly what this class is for.
+ * 
+ * Finding the maximum value is yuck because there's obviously no closed-form solution,
+ * but golden-section search gets there robustly and with reliable performance: the
+ * number of times the curve function needs to be evaluated is constant (about 35-40 in practice
+ * depending on ball Ball.RADIUS and tolerance).
+ * 
+ * A note about modality: the algorithm expects unimodal functions, but in practice, *which* maximum
+ * it converges to doesn't matter as long as it truly is the highest point. So even though I can
+ * make zero guarantees about what the user inputs (sin(x) would be multimodal), this is fine.
 */
 public final class GoldenSectionSearch {
     private GoldenSectionSearch() { // make non-instantiable

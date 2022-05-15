@@ -4,10 +4,31 @@ import java.util.function.Supplier;
 
 import rollingball.functions.Function.Expr;
 
+/**
+ * A helper class for going from function name and parameters to a {@link Function.Expr} node.
+ */
 public final class BuiltinFunctions {
     private BuiltinFunctions() {
     } // Make non-instantiable
 
+    /**
+     * Maps a function name and parameters to an {@link Expr}.
+     * Recognized function names are:
+     * <ul>
+     * <li>sin, cos, tan</li>
+     * <li>asin/arcsin, acos/arccos, atan/arctan, atan2/arctan2</li>
+     * <li>sinh, cosh, tanh</li>
+     * <li>sqrt, cbrt, hypot, pow, cexp, log/ln, log10/lg</li>
+     * <li>abs, min, max</li>
+     * <li>floor, round, ceil</li>
+     * </ul>
+     * Function names are case-insensitive.
+     * @param name the name of the function.
+     * @param firstParam the first parameter to the function.
+     * @param paramSupplier a supplier of parameters for if more than one are needed.
+     * @returns the {@link Expr} representing the function call. Never null.
+     * @throws ParserException if the function name is not recognized.
+     */
     public static Expr parseFunctionCall(String name, Expr firstParam, Supplier<Expr> paramSupplier) {
         Expr result;
         if ((result = tryParseTrigonometric(name, firstParam)) != null) {
@@ -59,7 +80,7 @@ public final class BuiltinFunctions {
             case "min" -> ctx -> Math.min(param1.eval(ctx), param2.eval(ctx));
             case "max" -> ctx -> Math.max(param1.eval(ctx), param2.eval(ctx));
             case "pow" -> ctx -> Math.pow(param1.eval(ctx), param2.eval(ctx));
-            case "atan2" -> ctx -> Math.atan2(param1.eval(ctx), param2.eval(ctx));
+            case "atan2", "arctan2" -> ctx -> Math.atan2(param1.eval(ctx), param2.eval(ctx));
             case "hypot" -> ctx -> {
                 var x1 = param1.eval(ctx);
                 var x2 = param2.eval(ctx);

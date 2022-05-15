@@ -2,10 +2,21 @@ package rollingball.functions;
 
 import java.util.Arrays;
 
+/**
+ * Namespace for a high-level interface to expression parsing.
+ */
 public final class FunctionParser {
     private FunctionParser() {
     }
 
+    /**
+     * Parses an expression and a condition and returns a function representing them.
+     * If either of the strings are empty, null is returned.
+     * @param expression the expression to parse.
+     * @param condition the condition to parse.
+     * @return the function representing the expression and the condition, or null.
+     * @throws ParserException if the expression or condition have invalid syntax.
+     */
     public static Function parse(String exprString, String conditionString) {
         var expr = parseChecked(exprString, new ExpressionParser());
         var cond = parseChecked(conditionString, new ConditionParser());
@@ -33,6 +44,11 @@ public final class FunctionParser {
         return exprResult.value();
     }
 
+    /**
+     * A helper method that removes any whitespace in the input string.
+     * @param expr the input string.
+     * @return the input string with whitespace removed, as a char array.
+     */
     public static char[] removeWhitespace(String expr) {
         var result = new char[expr.length()];
         var i = 0;
