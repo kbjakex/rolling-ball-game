@@ -1,6 +1,6 @@
 ## Sovelluksen käyttöohje
 
-Aloita lataamalla sovellus [täältä](https://github.com/kbjakex/ot-harjoitystyo/releases/tag/viikko6). 
+Aloita lataamalla sovellus [täältä](https://github.com/kbjakex/ot-harjoitystyo/releases/download/Loppupalautus/RollingBall-1.0-SNAPSHOT.jar). 
 Varmista, että [Java 18](https://jdk.java.net/18/) on asennettu ja toimii. Voit tarkistaa Java-versiosi ja Javan toimivuuden avaamalla komentokehotteen ja kirjoittamalla komennon `java --version`.
 
 Avaa konsoli samaan kansioon, missä ladattu jar-tiedosto sijaitsee. Käynnistä sovellus komennolla
@@ -15,8 +15,7 @@ Sovellus on siis peli, ja avautuu päävalikkoon.
 
 <img src="https://raw.githubusercontent.com/kbjakex/ot-harjoitystyo/main/dokumentaatio/kuvat/mainmenu.png" width="600">
 
-Kirjautumista ei vaadita. Päävalikosta pääsee suoraan peliin "Start"-painikkeesta, jolloin peli alkaa viimeisestä kentästä, jonka olet avannut. 
-Ensimmäisellä avauskerralla ainoastaan ensimmäinen kenttä on auki. 
+Kirjautumista ei vaadita. Päävalikosta pääsee suoraan peliin "Start"-painikkeesta, joka ensimmäisellä pelikerralla vie ensimmäiseen kenttään. Muilla pelikerroilla  peli alkaa viimeisestä kentästä, jonka olet avannut. 
 
 
 Päävalikosta pääsee myös kenttävalikkoon "Level Select"-painikkeen avulla. Kenttävalikko näyttää seuraavalta:
@@ -59,3 +58,7 @@ Rajauksissa on käytössä kaikki samat muuttujat, operaattorit, vakiot ja funkt
 Esimerkiksi seuraava rajaisi syötteen välille -5..5: `-5 <= x <= 5`, ja seuraava välille 0..inf: `x >= 0`
 
 Rajausten käytöstä ei koskaan vähennetä pisteitä, sillä ne ovat hyödyllisiä lähinnä usesan yhtälön tilanteissa, jolloin pisteitä menee joka tapauksessa yhtälöiden määrästä.
+
+### Pelin voittaminen
+
+Pelissä ei ole yhtä oikeaa "voittoa". Ensimmäinen tavoite voisi olla päästä kentät läpi, ja toisella kierroksella saada kaikki kolmelle tähdelle!
