@@ -14,29 +14,33 @@ Peli käynnistyy "päävalikkoon", josta päästään joko jatkamaan aiempaa pel
 
 <img src="https://raw.githubusercontent.com/kbjakex/ot-harjoitystyo/main/dokumentaatio/kuvat/kayttoliittymadraft.jpg" width="800">
 
-## Perusversion tarjoama toiminnallisuus
+## Toiminnallisuus
 
-- käyttäjä voi navigoida näkymästä toiseen eli selata kenttiä ja aloittaa pelaamisen (**tehty**)
-- käyttäjä näkee kenttävalikkonäkymästä oman edistymisensä (**tehty**)
-- käyttäjä voi jatkaa päävalikon "start"-painikketta käyttäen siitä kentästä, mihin viime pelikerralla jäi, tai ensimmäisestä, jos ei ole ennen pelannut (**tehty**)
-- käyttäjä voi syöttää pelinäkymässä yhtälöitä muotoa `y = f(x)` tai `x = f(y)` (**tehty**)
-- yhtälöt piirtyvät pelikentälle graafisen laskimen tapaan (**tehty**)
-- pelin pallohahmo voi pyöriä näiden yhtälöiden muodostamien käyrien päällä (**tehty**)
-- käyttäjä voi poistaa aiemmin lisäämiään yhtälöitä (**tehty**)
-- käyttäjä voi muokata aiemmin lisäämiään yhtälöitä (**tehty**)
-- yhtälöt voivat sisältää muuttujan `t`, mikä kuvastaa aikaa (**tehty**)
-- muuttujan `t` arvo kasvaa monotonisesti ja alkaa aina suoritusyrityksen alkaessa nollasta (**tehty**)
-- yhtälöitä voi rajata esim. välille `1 <= x <= 3` lisäämällä yhtälön perään `| (rajaus)`. Esimerkki: `y = sin(x) | 0 <= x <= 2*PI` (**tehty**)
-- käyttäjä voi hävitä pelin a) pallon tippuessa pois pelialueelta tai b) törmäämällä esteeseen (**tehty**)
-- käyttäjä voi kenttiä ratkaisemalla "avata" uusia kenttiä pelattavaksi (**tehty**)
-- käyttäjä näkee kenttävalikkonäkymästä kenttäkohtaisen suorituksensa, mikä arvioidaan tähdillä (0-3 tähteä), joiden määrä lasketaan ensisijaisesti käytettyjen yhtälöiden määrästä (täydet kolme saa vain yhdellä yhtälöllä) ja toissijaisesti pallon kulkemisajan perusteella. (**tehty**)
-- sovellus sisältää vähintään 5 kenttää (**tehty**)
-- sovellus tallentaa käyttäjän edistymisen sovellusbinäärin kanssa samaan kansioon binääritiedostoon "rollingballdata.dat" (**tehty**)
-- sovellus lataa `rollingballdata.dat` tiedoston sisällön käynnistyessä (**tehty**)
+* Päävalikko
+  * Päävalikosta voi jatkaa pelaamista siitä, mihin jäi, tai ensimmäisestä kentästä, jos ei ole aiemmin pelannut.
+  * Päävalikosta voi myös siirtyä kenttävalikkoon tai poistua pelistä
+* Kenttävalikko
+  * Kenttävaliko näyttää, montako kenttää pelaaja on ratkaissut, montako on jäljellä, ja paljonko on saanut tähtiä ratkaisemistaan kentistä (0-3).
+* Pelinäkymä
+  * Käyttäjä voi syöttää yhtälöitä muotoa `y = f(x)` (`y=` on implisiittinen)
+  * Käyttäjä voi rajoittaa, millä ehdolla yhtälö piirretään, käyttämällä operaattoreita `<`, `<=`, `>=` ja `>` (esim. `1 < x < 5` tai `x >= 0`).
+  * Yhtälöt voivat sisältää muuttujia `x` ja `t` sekä vakioita `e` ja `pi`. `t` alkaa jokaisella yrityksellä nollasta ja mittaa sekunteja.
+  * Yhtälöissä voi käyttää ainakin funktioita sin, cos, tan, asin, acos, atan, sinh, cosh, tanh, ln, lg, sqrt, abs, floor, ceil, round, sign, min, max, atan2. 
+  * Käyttäjä muokata aiemmin lisäämiään yhtälöitä.
+  * Käyttäjä voi poistaa aiemmin lisäämiään yhtälöitä.
+  * Käyttäjän syöttämät yhtälöt piirtyvät koordinaattiruudukolle; jokainen eri värillä, jotta käyttäjälle on tarvittaessa selvää, mitä yhtälöä muokata.
+  * Käyttäjä voi aloittaa pelin play-painikkeesta, jolloin pelin pallohahmo alkaa pyörimään oikealle. Hahmo pyörii kuvaajien päällä.
+  * Käyttäjä voi epäonnistua suorituksessaan törmäämällä esteeseen tai antamalla pallohahmon poistua pelialueelta.
+  * Käyttäjä saa kentän ratkaistuaan seuraavan kentän auki, jos kenttiä on vielä jäljellä.
+  * Kun käyttäjä ratkaisee kentän, tallennetaan käyttäjän syötteet sekä pisteet kyseisestä kentästä tiedostoon `rollingballdata.dat`.
+* Muuta
+  * Peli sisältää 5 kenttää
+  * "Exit"/"Back" -napit siirtyvät aina edelliseen näkymään.
+  * Peli lataa käynnistyessä pelaajan edistymisen tiedostosta `rollingballdata.dat`. Jos tiedosto on korruptoitunut, kysyy sovellus käyttäjältä, halutaanko tiedosto korvata uudella, tyhjällä tiedostolla.
 
 ## Jatkokehitysideoita
 
-Peliä voisi jatkokehittää mm. seuraavasti:
+Peliä voisi tulevaisuudessa jatkokehittää seuraavasti:
 
 - kun pelaaja onnistuneesti ratkaisee kentän, voisi ratkaisuun käytetyt yhtälöt ja saadut pisteet lähettää esim. Google Sheetsiin.
 - peli voisi Google Sheetsistä kentän ratkaistua pelaajan halutessa hakea muiden ratkaisut kenttään, jotta tuloksia ja ratkaisuja voisi vertailla
