@@ -34,3 +34,12 @@
 - Javadoc-dokumentaatio on aloitettu; `game`- ja `ui`-kansiot ovat täysin dokumentoituja.
 - Peli ei enää käytä oikeaa aikaa ajan mittaukseen, minkä ansiosta peli on nyt reilu myös hitailla koneilla, deterministinen ja yksikkötestattava. Jokainen kenttä onkin nyt yksikkötestattu malliratkaisun avulla.
 - Lisättiin käyttöohje
+
+## Viikko 7
+
+- Virheviestejä parannettu - ei enää kryptisiä EOF viestejä
+- Testausta lisätty
+- Sovellus ei enää automaattisesti korvaa korruptoitunutta tallennustiedostoa, kysyy ensin käyttäjältä
+- Lisättiin testausdokumentti
+- Laajennettiin arkkitehtuuridokumenttia
+- JavaDocsit viimeistelty
