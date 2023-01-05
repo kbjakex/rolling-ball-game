@@ -1,5 +1,8 @@
 # Ohjelmistotekniikka, harjoitustyö
 
+[Esimerkki 1](https://user-images.githubusercontent.com/90567676/210844172-2e388785-bbbb-44a2-98e8-6692f8ef413c.mp4)
+[Esimerkki 2](https://user-images.githubusercontent.com/90567676/210841725-3780acac-92e8-4551-b5e6-668d8555c7ec.mp4)
+
 Sovellus on peli, jossa ohjataan kaksiulotteisessa avaruudessa oikealle kulkeva pallo lähdöstä maaliin kirjoittamalla yhtälöitä, joilla määritellään pallolle pintoja, joiden päällä pyöriä.
 
 Meneillään on viikko 7. Peli on valmis.
